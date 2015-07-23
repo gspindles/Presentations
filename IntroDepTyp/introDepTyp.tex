@@ -1,36 +1,91 @@
-\documentclass{beamer}
-\usetheme{Antibes}
-\usecolortheme{beaver}
+\documentclass[xcolor={usenames,dvipsnames}]{beamer}
 
-\usepackage{lmodern}
-\usepackage{verbatim}
-\newenvironment{code}{\footnotesize\verbatim}{\endverbatim\normalsize}
+\usepackage[T1]{fontenc}
 \usepackage{listings}
-\lstset{language=Haskell}
-\lstloadlanguages{Haskell}
-%\lstnewenvironment{code}
-%  {\lstset{}%
-%    \csname lst@SetFirstLabel\endcsname}
-%  {\csname lst@SaveFirstLabel\endcsname}
-%  \lstset{
-%    basicstyle=\small\ttfamily,
-%    flexiblecolumns=false,
-%    basewidth={0.5em,0.45em},
-%    literate={+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
-%    {>}{{$>$}}1 {<}{{$<$}}1 {\\}{{$\lambda$}}1
-%    {\\\\}{{\char`\\\char`\\}}1
-%    {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 {<-}{{$\leftarrow$}}2
-%    {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2 
-%    {\ .}{{$\circ$}}2 {\ .\ }{{$\circ$}}2
-%    {>>}{{>>}}2 {>>=}{{>>=}}2
-%    {|}{{$\mid$}}1               
-%  }
 
 \title{Introduction to Dependent Types}
 \subtitle{Eagan Technology Unconference}
 \author{Joseph Ching}
-\institute{Thomson Reuters}
 \date{September 22, 2015}
+
+\usetheme{Antibes}
+\usecolortheme{beaver}
+
+\newcommand{\hkeyword}[1]{\textcolor{TealBlue}{\textsc{#1}}}
+\newcommand{\hfunction}[1]{\textcolor{Green}{\textsc{#1}}}
+\newcommand{\htycon}[1]{\textcolor{Blue}{\textsc{#1}}}
+\newcommand{\hvalcon}[1]{\textcolor{Red}{\textsc{#1}}}
+\newcommand{\hkind}[1]{\textcolor{Fuchsia}{\textsc{#1}}}
+\newcommand{\hclass}[1]{\textcolor{Magenta}{\textsc{#1}}}
+\newcommand{\htyfam}[1]{\textcolor{OliveGreen}{\textsc{#1}}}
+\newcommand{\hcomment}[1]{\textcolor{Grey}{\textsc{#1}}}
+\newcommand{\hother}[1]{\textcolor{Black}{\textsc{#1}}}
+
+\lstdefinestyle{hask}{
+  basicstyle=\ttfamily\tiny\color{Black},
+  sensitive=true,
+  morecomment=[l][\color{Gray}\ttfamily\tiny]{--},
+  morecomment=[s][\color{Gray}\ttfamily\tiny]{\{-}{-\}},
+  morestring=[b]",
+  stringstyle=\color{Maroon},
+  showstringspaces=false,
+  numberstyle=\color{Red},
+  numberblanklines=true,
+  showspaces=false,
+  breaklines=true,
+  showtabs=false,
+  moredelim=**[is][\color{TealBlue}]{@dt}{@},
+  moredelim=**[is][\color{Green}]{@f}{@},
+  moredelim=**[is][\color{Blue}]{@tc}{@},
+  moredelim=**[is][\color{Red}]{@vc}{@},
+  moredelim=**[is][\color{Fuchsia}]{@dk}{@},
+  moredelim=**[is][\color{Magenta}]{@cc}{@},
+  moredelim=**[is][\color{OliveGreen}]{@tf}{@},
+  % Keywords
+  emph=
+  {[1]
+    module,import,infixr,infixl,where,let,in,case,of,if,then,else,do,
+    type,newtype,data,family,class,instance,deriving,foreign
+  },
+  emphstyle={[1]\color{TealBlue}\textbf},
+  % functions
+  emph=
+  {[2]
+    map,filter,foldr,length,fmap,id
+  },
+  emphstyle={[2]\color{Green}},
+  % type constructors
+  emph=
+  {[3]
+    Char,String,Bool,Int,Integer,Double,Float,Ordering,Maybe,Either,IO
+  },
+  emphstyle={[3]\color{Blue}\textbf},
+  emph=
+  % value constructors
+  {[4]
+    True,False,Nothing,Just,Left,Right,GT,LT,EQ
+  },
+  emphstyle={[4]\color{Red}\textbf},
+  % type classes, contexts, constraints
+  emph=
+  {[5]
+    Show,Read,Eq,Ord,Enum,Bounded,Num,
+    Monoid,Functor,Foldable,Traversable,Applicative,Alternative,Monad,Comonad,Arrow
+  },
+  emphstyle={[5]\color{Magenta}\textbf},
+  % kinds
+  emph=
+  {[6]
+    Constraint,AnyK,OpenKind,BOX
+  },
+  emphstyle={[6]\color{Fuchsia}\textbf},
+  % type families
+  emph=
+  {[7]
+    Plus,Mult
+  },
+  emphstyle={[7]\color{OliveGreen}\textbf}
+}
 
 \begin{document}
 
@@ -39,16 +94,16 @@
 % Title Page %
 %%%%%%%%%%%%%%
 \begin{frame}[plain]
-    \titlepage
-    \end{frame}
+  \titlepage
+\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%
 % Table of Content %
 %%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Table of Content}
-    \tableofcontents[pausesections]
-    \end{frame}
+\begin{frame}{Table of Contents}
+  \tableofcontents[pausesections]
+\end{frame}
 
 
 %%%%%%%%%%%%%%%%
@@ -56,19 +111,26 @@
 %%%%%%%%%%%%%%%%
 \section{Introduction}
 
-  % intro 1
-  \begin{frame}{Introduction}
-    Test code block
-    %\begin{code}
-    %  main :: IO ()
-    %  main =  putStrLn "Hello, World!"
-    %\end{code}
-    done
-  \end{frame}
+% intro 1
+\begin{frame}[fragile]{Introduction}
+  Syntax highlighting reference
 
-  % intro 2
-  \begin{frame}
-  \end{frame}
+  \begin{lstlisting}[style=hask]
+
+    data Maybe a = Nothing | Just a
+                   deriving (Show, Eq)
+
+    map :: Functor f => (a -> b) -> f a -> f b
+    map _ @vc[]@    = @vc[]@
+    map f (x@vc:@xs) = f x @vc:@ map f xs
+
+    type family @tfTF@ a :: @dk*@
+    type instance @tfTF@ Int = Bool
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\end{frame}
 
 
 %%%%%%%%%
@@ -76,10 +138,11 @@
 %%%%%%%%%
 \section{Questions}
 
-  % q&a
-  \begin{frame}
-      Questions?
-  \end{frame}
+% q&a
+\begin{frame}
+  Questions?
+\end{frame}
 
 
 \end{document}
+
