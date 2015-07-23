@@ -113,19 +113,27 @@
 
 % intro 1
 \begin{frame}[fragile]{Introduction}
-  Syntax highlighting reference
+  Syntax highlighting test reference, to be removed later.
 
   \begin{lstlisting}[style=hask]
 
+    -- Comment
     data Maybe a = Nothing | Just a
                    deriving (Show, Eq)
 
-    map :: Functor f => (a -> b) -> f a -> f b
-    map _ @vc[]@    = @vc[]@
+    fmap :: Functor f => (a -> b) -> f a -> f b
+    map _ @vc[]@     = @vc[]@
     map f (x@vc:@xs) = f x @vc:@ map f xs
 
     type family @tfTF@ a :: @dk*@
     type instance @tfTF@ Int = Bool
+
+    {- block comment -}
+    @ffoo@ :: Bool -> Int -> String
+    @ffoo@ False @vc0@ = "Bad"
+    @ffoo@ True  @vc0@ = "Questionable"
+    @ffoo@ False n = "Fake"
+    @ffoo@ True  n = "Read"
   \end{lstlisting}
 \end{frame}
 
