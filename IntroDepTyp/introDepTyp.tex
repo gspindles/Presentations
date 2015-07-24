@@ -35,7 +35,7 @@
   showspaces=false,
   breaklines=true,
   showtabs=false,
-  moredelim=**[is][\color{TealBlue}]{@dt}{@},
+  moredelim=**[is][\color{TealBlue}]{@kw}{@},
   moredelim=**[is][\color{Green}]{@f}{@},
   moredelim=**[is][\color{Blue}]{@tc}{@},
   moredelim=**[is][\color{Red}]{@vc}{@},
@@ -126,10 +126,10 @@
 
   Nor is it a \texttt{lens} tutorial
   \pause
-  (aka the new new \texttt{m-} tutorial...
+  (aka the new new \texttt{m-} tutorial\ldots
 
   \pause
-  ...because \texttt{arrows} \textit{were} the new \texttt{m-} tutorials).
+  \ldots because \texttt{arrows} \textit{were} the new \texttt{m-} tutorials).
 
 \end{frame}
 
@@ -140,21 +140,24 @@
     Because of that, it's harder to see the build up, so we won't be directly using them in this talk.\\
     \pause
     \textit{\tiny{Honestly though, it's because they're way over my head :(}}\\
-    \textit{\tiny{(*) There was another mini joke here...}}
+    \textit{\tiny{(*) There was another mini joke here\ldots}}
 \end{frame}
 
 \begin{frame}{About This Talk}
   But we will be using \texttt{Haskell} though :)\\
   \pause
   It's not truely dependent, but we can do more and more with each \texttt{language extension} that comes along.\\
+  For the examples, there also will be loose translation to imperative/OOP; though please keep in mind that they are not the same thing at all.
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Introduction
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Introduction}
+\section{Review of Basics}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Test}
 % Test highlighting examples
 \begin{frame}[fragile]{Test}
   Syntax highlighting test reference, to be removed later.
@@ -196,24 +199,135 @@
     @fzipWith@ _ _      @vc[]@     = @vc[]@ @|\pause@
     @fzipWith@ f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ @fzipWith@ f xs ys
   \end{lstlisting}
+
+  better yet
+
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE KitchenSink #-}
+    @fzipWith@ :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@
+    @fzipWith@ f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ @fzipWith@ f xs ys
+    @fzipWith@ _ _      _      = @vc[]@
+  \end{lstlisting}
 \end{frame}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Values and Types}
+
 \begin{frame}[fragile]{Values and Types}
-  Values has types.\\
-  Values are classified by types.\\
+  Values has types, or \hvalcon{Values} are classified by \htycon{Types}.\\
 
   \begin{lstlisting}[style=hask]
-    ..., @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@ :: Int
+    @|\ldots@, @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@, @|\dots@ :: Int @|\pause@
+    True, False :: Bool @|\pause@
+    @str'a'@, @str'b'@, @str'c'@ :: Char @|\pause@
+    "abc" :: String @|$\sim$@ @tc[@Char@tc]@
+
   \end{lstlisting}
+
+  \tiny{\hvalcon{Values} are also called \hvalcon{Terms}}
+\end{frame}
+
+\begin{frame}[fragile]{About Types}
+  How are the types defined?\\
+  \begin{itemize}
+    \item Some are built in magic: \htycon{Int}, \htycon{Char}, functions
+    \pause
+    \item Some are built in sugar: list, tuples
+      \begin{itemize}
+        \item We can still define these ourselves without the sugar
+      \end{itemize}
+    \pause
+    \item Rest can be user defined: \htycon{Bool}, \htycon{String}, \htycon{Maybe}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Empty and Unit Types}
+  Define new data type with \hkeyword{data}.
+  \pause
+  \begin{itemize}
+    \item Left hand side (\htycon{LHS}) - \htycon{Type} constructor
+    \pause
+    \item Right hand side (\hvalcon{RHS}) - \hvalcon{Value} constructor
+    \pause
+  \end{itemize}
+
+  \ \\
   \begin{lstlisting}[style=hask]
-    True, False :: Bool
+    data Bool = False | True
   \end{lstlisting}
+
+  Here, \htycon{Bool} is the \htycon{Type} constructor, \hvalcon{True} and \hvalcon{False} are \hvalcon{Value} constructors.\\
+  \textit{\tiny{Does this remind you of anything?}}
+\end{frame}
+
+\begin{frame}[fragile]{Empty and Unit Types}
+  Define new data type with \hkeyword{data}.
+  \begin{itemize}
+    \item Left hand side (\htycon{LHS}) - \htycon{Type} constructor
+    \item Right hand side (\hvalcon{RHS}) - \hvalcon{Value} constructor
+  \end{itemize}
+
+  \ \\
   \begin{lstlisting}[style=hask]
-    @str'a'@, @str'b'@, @str'c'@ :: Char
+    data Bool = False | True
   \end{lstlisting}
+
+  A loose translation:
   \begin{lstlisting}[style=hask]
-    "abc" :: String ~ @tc[@Char@tc]@
+    @kwenum@ Bool { False, True }
   \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Sum Types}
+  Simply, \htycon{Types} with more than one constructors.
+  \pause
+  \begin{lstlisting}[style=hask]
+    data Bool = False | True
+    data @tcWeekdays@ = @vcSunday@ | @vcMonday@ | @vcTuesday@ | @vcWednesday@
+                  | @vcThursday@ | @vcFriday@ | @vcSaturday@
+  \end{lstlisting}
+
+  \pause
+  \ \\
+  Can parametrize over another type:
+  \pause
+  \begin{lstlisting}[style=hask]
+    data Maybe a = Nothing | Just a
+  \end{lstlisting}
+
+  A \textit{very} loose translation \tiny{(assuming capitalization implies constructor)}:
+  \begin{lstlisting}[style=hask]
+    @kwclass@ Maybe<T> {
+      Nothing() @|\{\}@,
+      Just(T t) {@|\ldots@}
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Product Types}
+\end{frame}
+
+\begin{frame}[fragile]{Sum Types}
+\end{frame}
+
+\begin{frame}[fragile]{Phantom Types}
+\end{frame}
+
+\begin{frame}[fragile]{Language Extension - GADTs}
+\end{frame}
+
+\begin{frame}[fragile]{Type Synonyms}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Functions}
+
+\begin{frame}[fragile]{Functions}
+\end{frame}
+
+\begin{frame}[fragile]{Higher-order Functions}
 \end{frame}
 
 

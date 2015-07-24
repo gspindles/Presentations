@@ -1,0 +1,108 @@
+// start with familiar stuff
+// with some intro to Haskell syntax
+
+preface
+- How many are familiar with this topic?
+- Joke : this presentation is not a monad tutorial.
+  nor is it a lens tutorial (aka the new new monad tutorials)
+  (arrows were the new monad tutorials)
+- Agda, Idris, Coq and co- have full support for dependent types.
+  Because of that, it's harder to see the build up,
+  so we won't be using them in this talk
+  (really it's because they are way over my head)
+- We will be using Haskell though :)
+  It's not yet fully dependent, and probably never will be.
+  But it's slowly getting there with each language extension that comes along.
+
+
+Let's get started, learn syntax along the way.
+
+- values has types
+better to say values belong to a types
+or values are classified by types
+
+... -1, 0, 1, 2, 3 ... :: Int
+True, False :: Bool
+'a', 'b', 'c' :: Char
+
+
+- functions 
+maps values of type a to values of type b :
+
+even :: Int -> Bool
+even 0 = True
+even n = if rem n 2 == 0
+         then True
+         else False
+
+id :: a -> a
+id a = a
+
+static T id<T>(T t) { return t; }
+
+
+- higher-order functions
+function can take functions as param 
+
+($) :: (a -> b) -> a -> b
+($) f a = f a
+
+static B apply(Func<A, B> f, A a) { return f(b); }
+
+
+with that (and some other not as relevant stuff), we have lambda calculus
+a classic example for a simple language that is Turing Complete
+
+
+Extend lambda calculus to be able to do more things
+what do we have so far?
+
+values :: type, f :: a -> b
+=> set of values to values
+~> values depending on values!
+
+what about:
+values depending on types -> parametric polymorphism aka generics in OO terminology
+types depending on types -> ???
+types depending on values -> ???
+
+
+before we get to those,
+need to learn more about types first...
+
+- Unit Type
+data () = ()
+
+data Unit = Unit
+
+
+- Sum types (pt 1)
+data Bool = True | False
+data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
+
+enums anyone??
+
+what about integers?
+data Int = ... | -3 | -2 | -1 | 0 | 1 | 2 | 3 | ...
+
+
+- Product Types (pt 1) 
+
+data BoolPair = BoolPair Bool Bool
+
+data (,) a b = (a, b)
+
+unsugaring...
+data Tuple a b = Pair a b
+
+data [a] = [] | a : [a]
+
+unsugaring...
+
+data List a = Nil | Cons a (List a)
+
+map :: (a -> b) -> [a] -> [b]
+map f []     = []
+map f (x:xs) = f x : map f xs
+
+
