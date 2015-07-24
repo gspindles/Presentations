@@ -1,6 +1,7 @@
 \documentclass[xcolor={usenames,dvipsnames}]{beamer}
 
 \usepackage[T1]{fontenc}
+\usepackage{verbatim}
 \usepackage{listings}
 
 \title{Introduction to Dependent Types}
@@ -22,7 +23,7 @@
 \newcommand{\hother}[1]{\textcolor{Black}{\textsc{#1}}}
 
 \lstdefinestyle{hask}{
-  basicstyle=\ttfamily\tiny\color{Black},
+  basicstyle=\ttfamily\scriptsize\color{Black},
   sensitive=true,
   morecomment=[l][\color{Gray}\ttfamily\tiny]{--},
   morecomment=[s][\color{Gray}\ttfamily\tiny]{\{-}{-\}},
@@ -41,11 +42,14 @@
   moredelim=**[is][\color{Fuchsia}]{@dk}{@},
   moredelim=**[is][\color{Magenta}]{@cc}{@},
   moredelim=**[is][\color{OliveGreen}]{@tf}{@},
+  moredelim=**[is][\color{Maroon}]{@str}{@},
+  escapeinside={{@|}{@}},
   % Keywords
   emph=
   {[1]
-    module,import,infixr,infixl,where,let,in,case,of,if,then,else,do,
-    type,newtype,data,family,class,instance,deriving,foreign
+    module,import,qualified,hiding,as,foreign,infix,infixr,infixl,
+    where,let,in,case,of,if,then,else,do,rec,proc,forall,pi,
+    type,newtype,data,family,class,instance,deriving,default
   },
   emphstyle={[1]\color{TealBlue}\textbf},
   % functions
@@ -90,60 +94,132 @@
 \begin{document}
 
 
-%%%%%%%%%%%%%%
-% Title Page %
-%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Title Page
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[plain]
   \titlepage
 \end{frame}
 
 
-%%%%%%%%%%%%%%%%%%%%
-% Table of Content %
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Table of Content
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Table of Contents}
   \tableofcontents[pausesections]
 \end{frame}
 
 
-%%%%%%%%%%%%%%%%
-% Introduction %
-%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Preface
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Preface}
+
+\begin{frame}{Quick Question}
+  How many are familiar with this topic?
+\end{frame}
+
+\begin{frame}{A Joke}
+  This is not a \texttt{m-} tutorial.
+
+  \pause
+
+  Nor is it a \texttt{lens} tutorial
+  \pause
+  (aka the new new \texttt{m-} tutorial...
+
+  \pause
+  ...because \texttt{arrows} \textit{were} the new \texttt{m-} tutorials).
+
+\end{frame}
+
+
+\begin{frame}{About This Talk}
+    \texttt{Agda}, \texttt{Idris}, \texttt{Coq} and co$^*$ have full support for dependent types.\\
+    \pause
+    Because of that, it's harder to see the build up, so we won't be directly using them in this talk.\\
+    \pause
+    \textit{\tiny{Honestly though, it's because they're way over my head :(}}\\
+    \textit{\tiny{(*) There was another mini joke here...}}
+\end{frame}
+
+\begin{frame}{About This Talk}
+  But we will be using \texttt{Haskell} though :)\\
+  \pause
+  It's not truely dependent, but we can do more and more with each \texttt{language extension} that comes along.\\
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-% intro 1
-\begin{frame}[fragile]{Introduction}
+% Test highlighting examples
+\begin{frame}[fragile]{Test}
   Syntax highlighting test reference, to be removed later.
 
   \begin{lstlisting}[style=hask]
-
-    -- Comment
-    data Maybe a = Nothing | Just a
-                   deriving (Show, Eq)
-
-    fmap :: Functor f => (a -> b) -> f a -> f b
-    map _ @vc[]@     = @vc[]@
-    map f (x@vc:@xs) = f x @vc:@ map f xs
-
-    type family @tfTF@ a :: @dk*@
-    type instance @tfTF@ Int = Bool
-
-    {- block comment -}
-    @ffoo@ :: Bool -> Int -> String
-    @ffoo@ False @vc0@ = "Bad"
-    @ffoo@ True  @vc0@ = "Questionable"
-    @ffoo@ False n = "Fake"
-    @ffoo@ True  n = "Read"
+      -- Comment
+      data Maybe a = Nothing | Just a
+                     deriving (Show, Eq)
+ 
+      fmap :: Functor f => (a -> b) -> f a -> f b
+      map _ @vc[]@     = @vc[]@
+      map f (x@vc:@xs) = f x @vc:@ map f xs
+ 
+      type family @tfTF@ a :: @dk*@
+      type instance @tfTF@ Int = Bool
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Test}
+  Couldn't quite yet get listing to work with overlay yet.
+
+  \begin{lstlisting}[style=hask]
+      {- block comment -}
+      @ffoo@ :: Bool -> Int -> String
+      @ffoo@ False @vc0@ = "Bad"
+      @ffoo@ True  @vc0@ = "Questionable"
+      @ffoo@ False n = "Fake"
+      @ffoo@ True  n = "Read"
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Test}
+  Pausing within listing is ok?
+
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE KitchenSink #-}
+    @fzipWith@ :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@ @|\pause@
+    @fzipWith@ _ @vc[]@     _      = @vc[]@ @|\pause@
+    @fzipWith@ _ _      @vc[]@     = @vc[]@ @|\pause@
+    @fzipWith@ f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ @fzipWith@ f xs ys
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Values and Types}
+  Values has types.\\
+  Values are classified by types.\\
+
+  \begin{lstlisting}[style=hask]
+    ..., @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@ :: Int
+  \end{lstlisting}
+  \begin{lstlisting}[style=hask]
+    True, False :: Bool
+  \end{lstlisting}
+  \begin{lstlisting}[style=hask]
+    @str'a'@, @str'b'@, @str'c'@ :: Char
+  \end{lstlisting}
+  \begin{lstlisting}[style=hask]
+    "abc" :: String ~ @tc[@Char@tc]@
+  \end{lstlisting}
 \end{frame}
 
 
-%%%%%%%%%
-% Q & A %
-%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Q & A
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Questions}
 
 % q&a
