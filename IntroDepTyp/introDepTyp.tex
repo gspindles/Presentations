@@ -88,7 +88,13 @@
   {[7]
     Plus,Mult
   },
-  emphstyle={[7]\color{OliveGreen}\textbf}
+  emphstyle={[7]\color{OliveGreen}\textbf},
+  % foreign languages
+  emph=
+  {[8]
+    enum, interface
+  },
+  emphstyle={[8]\color{TealBlue}\textbf},
 }
 
 \begin{document}
@@ -215,7 +221,7 @@
 \subsection{Values and Types}
 
 \begin{frame}[fragile]{Values and Types}
-  Values has types, or \hvalcon{Values} are classified by \htycon{Types}.\\
+  Values has Types, or \hvalcon{Values} are classified by \htycon{Types}.\\
 
   \begin{lstlisting}[style=hask]
     @|\ldots@, @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@, @|\dots@ :: Int @|\pause@
@@ -275,7 +281,7 @@
 
   A loose translation:
   \begin{lstlisting}[style=hask]
-    @kwenum@ Bool { False, True }
+    enum Bool { False, True }
   \end{lstlisting}
 \end{frame}
 
@@ -293,22 +299,94 @@
   Can parametrize over another type:
   \pause
   \begin{lstlisting}[style=hask]
+    data @tcIdentity@ a = @vcIdentity@ a
+  \end{lstlisting}
+
+  \pause
+  \ \\
+  A \textit{very} loose translation \tiny{(assuming capitalization implies constructor)}:
+  \begin{lstlisting}[style=hask]
+    enum @tcIdentity@<T> {
+      @vcIdentity@(T t)
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Sum Types}
+  Simply, \htycon{Types} with more than one constructors.
+  \begin{lstlisting}[style=hask]
+    data Bool = False | True
+    data @tcWeekdays@ = @vcSunday@ | @vcMonday@ | @vcTuesday@ | @vcWednesday@
+                  | @vcThursday@ | @vcFriday@ | @vcSaturday@
+  \end{lstlisting}
+
+  \ \\
+  Can parametrize over another type:
+  \begin{lstlisting}[style=hask]
+    data @tcIdentity@ a = @vcIdentity@ a
+  \end{lstlisting}
+
+  \ \\
+  And its \htycon{Type}:
+  \begin{lstlisting}[style=hask]
+    @vcIdentity@ :: a -> @tcIdentity t
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Sum Types}
+  Another example:
+  \begin{lstlisting}[style=hask]
     data Maybe a = Nothing | Just a
   \end{lstlisting}
 
-  A \textit{very} loose translation \tiny{(assuming capitalization implies constructor)}:
+  \pause
+  \ \\
+  The \textit{very} loose translation:
   \begin{lstlisting}[style=hask]
-    @kwclass@ Maybe<T> {
-      Nothing() @|\{\}@,
-      Just(T t) {@|\ldots@}
+    enum Maybe<T> {
+      Nothing,
+      Just(T t)
     }
+  \end{lstlisting}
+
+  \pause
+  \ \\
+  The \htycon{Types} of the two \hvalcon{Value} constructors:
+  \begin{lstlisting}[style=hask]
+    Nothing :: Maybe a
+    Just    :: a -> Maybe a
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Sum Types}
+  A more involved example with \htycon{Either}:
+  \begin{lstlisting}[style=hask]
+    data Either a b = Left a | Right b
+  \end{lstlisting}
+
+  \pause
+  \ \\
+  Another \textit{very} loose translation:
+  \begin{lstlisting}[style=hask]
+    enum Either<T1, T2> {
+      Left(T1 t1),
+      Right(T2 t2)
+    }
+  \end{lstlisting}
+
+  \pause
+  \ \\
+  The two \hvalcon{Value} constructors have \htycon{Types}:
+  \begin{lstlisting}[style=hask]
+    Left  :: a -> Either a b
+    Right :: b -> Either a b
   \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Product Types}
 \end{frame}
 
-\begin{frame}[fragile]{Sum Types}
+\begin{frame}[fragile]{Types with Recursion}
 \end{frame}
 
 \begin{frame}[fragile]{Phantom Types}
