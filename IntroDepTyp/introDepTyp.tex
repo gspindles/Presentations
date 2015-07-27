@@ -1,6 +1,9 @@
 \documentclass[xcolor={usenames,dvipsnames}]{beamer}
 
 \usepackage[T1]{fontenc}
+\usepackage{totcount}
+\regtotcounter{section}
+\usepackage{multido}
 \usepackage{verbatim}
 \usepackage{listings}
 
@@ -12,6 +15,20 @@
 \usetheme{Antibes}
 \usecolortheme{beaver}
 
+\newcommand{\mytableofcontents}[0]{
+  \multido{\I=1+1}{\totvalue{section}}{
+    \begin{frame}<beamer>
+      \setcounter{section}{\I}
+      \frametitle{Outline}
+      \tableofcontents[
+      currentsection,
+      sectionstyle=show/show,
+      subsectionstyle=show/show/hide,
+      ]
+    \end{frame}
+  }
+  \setcounter{section}{0}
+}
 \newcommand{\hkeyword}[1]{\textcolor{TealBlue}{\textsc{#1}}}
 \newcommand{\hfunction}[1]{\textcolor{Green}{\textsc{#1}}}
 \newcommand{\htycon}[1]{\textcolor{Blue}{\textsc{#1}}}
@@ -111,9 +128,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Table of Content
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Table of Contents}
-  \tableofcontents[pausesections]
-\end{frame}
+% Want to hide subsection slide by slide
+%\begin{frame}{Table of Contents}
+%  \tableofcontents[pausesections]
+%\end{frame}
+\mytableofcontents
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,19 +160,28 @@
 
 
 \begin{frame}{About This Talk}
-    \texttt{Agda}, \texttt{Idris}, \texttt{Coq} and co$^*$ have full support for dependent types.\\
+    \texttt{Agda}, \texttt{Idris}, \texttt{Coq} and co$^*$ have full support for dependent types.
+
+    \ \\
     \pause
-    Because of that, it's harder to see the build up, so we won't be directly using them in this talk.\\
+    Because of that, it's harder to see the build up, so we won't be directly using them in this talk.
+    \ \\
+    \ \\
     \pause
     \textit{\tiny{Honestly though, it's because they're way over my head :(}}\\
     \textit{\tiny{(*) There was another mini joke here\ldots}}
 \end{frame}
 
 \begin{frame}{About This Talk}
-  But we will be using \texttt{Haskell} though :)\\
+  But we will be using \texttt{Haskell} though :)
+
+  \ \\
   \pause
   It's not truely dependent, but we can do more and more with each \texttt{language extension} that comes along.\\
-  For the examples, there also will be loose translation to imperative/OOP; though please keep in mind that they are not the same thing at all.
+
+  \ \\
+  \pause
+  For the examples, there will also be \textit{very} loose translation to imperative/OOP. Though please keep in mind that these are merely syntax translations, the actual concepts can differ vastly.
 \end{frame}
 
 
@@ -221,7 +249,7 @@
 \subsection{Values and Types}
 
 \begin{frame}[fragile]{Values and Types}
-  Values has Types, or \hvalcon{Values} are classified by \htycon{Types}.\\
+  \hvalcon{Values} has \htycon{Types}, or \hvalcon{Values} are classified by \htycon{Types}.\\
 
   \begin{lstlisting}[style=hask]
     @|\ldots@, @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@, @|\dots@ :: Int @|\pause@
@@ -235,113 +263,223 @@
 \end{frame}
 
 \begin{frame}[fragile]{About Types}
-  How are the types defined?\\
+  How are data types defined?\\
+  \pause
   \begin{itemize}
     \item Some are built in magic: \htycon{Int}, \htycon{Char}, functions
     \pause
     \item Some are built in sugar: list, tuples
       \begin{itemize}
-        \item We can still define these ourselves without the sugar
+        \item We can define equivalent non-sugar-ed version ourselves
       \end{itemize}
     \pause
     \item Rest can be user defined: \htycon{Bool}, \htycon{String}, \htycon{Maybe}
   \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Empty and Unit Types}
-  Define new data type with \hkeyword{data}.
+\begin{frame}[fragile]{About Types}
+  What does the data structure looks like?
   \pause
   \begin{itemize}
-    \item Left hand side (\htycon{LHS}) - \htycon{Type} constructor
+    \item Simple
     \pause
-    \item Right hand side (\hvalcon{RHS}) - \hvalcon{Value} constructor
+    \item Multiple \hvalcon{Value} constructors
     \pause
+    \item Paremetrize over another type
+    \pause
+    \item Recursive
   \end{itemize}
-
-  \ \\
-  \begin{lstlisting}[style=hask]
-    data Bool = False | True
-  \end{lstlisting}
-
-  Here, \htycon{Bool} is the \htycon{Type} constructor, \hvalcon{True} and \hvalcon{False} are \hvalcon{Value} constructors.\\
-  \textit{\tiny{Does this remind you of anything?}}
 \end{frame}
 
-\begin{frame}[fragile]{Empty and Unit Types}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Defining Data Types}
+\begin{frame}[fragile]{Defining Data Types}
   Define new data type with \hkeyword{data}.
+
+  \pause
+  \ \\
   \begin{itemize}
     \item Left hand side (\htycon{LHS}) - \htycon{Type} constructor
     \item Right hand side (\hvalcon{RHS}) - \hvalcon{Value} constructor
   \end{itemize}
 
+  \pause
   \ \\
+  \htycon{Type} constructors and \hvalcon{Value} constructors are capticalized.
+\end{frame}
+
+\begin{frame}[fragile]{Our First Example!}
+  Define a person:
   \begin{lstlisting}[style=hask]
-    data Bool = False | True
+    -- | params for firstname, lastname, age respectively
+    data @tcPerson@ = @vcPerson@ String String Int
   \end{lstlisting}
 
+  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum Bool { False, True }
+    enum @tcPerson@ {
+      @vcPerson@(String firstname, String lastname, Int age)
+    }
+  \end{lstlisting}
+
+  \pause
+  In this example, the \htycon{Type} and \hvalcon{Value} constructor have the same name. The \htycon{Type} of the \hvalcon{Person} constructor:
+  \begin{lstlisting}[style=hask]
+    @vcPerson@ :: String -> String -> Int -> @tcPerson@
+
+    bobby :: @tcPerson@
+    bobby = @vcPerson@ "Bobby" "Smith" @vc23@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Sum Types}
-  Simply, \htycon{Types} with more than one constructors.
-  \pause
+\begin{frame}[fragile]{Multiple Value Constructors}
+  Data can have multiple \hvalcon{Value} constructors:
   \begin{lstlisting}[style=hask]
     data Bool = False | True
+
     data @tcWeekdays@ = @vcSunday@ | @vcMonday@ | @vcTuesday@ | @vcWednesday@
                   | @vcThursday@ | @vcFriday@ | @vcSaturday@
   \end{lstlisting}
+  \textit{\tiny{Does this remind you of anything?}}
 
   \pause
   \ \\
-  Can parametrize over another type:
+  A loose translation:
+  \begin{lstlisting}[style=hask]
+    enum Bool { False, True }
+
+    enum @tcWeekdays@ {
+      @vcSunday@, @vcMonday@, @vcTuesday@, @vcWednesday@, @vcThursday@, @vcFriday@, @vcSaturday@
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Multiple Value Constructor}
+  You can do type aliasing with \hkeyword{type}:
+  \begin{lstlisting}[style=hask]
+    type @tcSide@ = Double
+    type @tcRadius@ = Double
+  \end{lstlisting}
+
   \pause
+  For example:
+  \begin{lstlisting}[style=hask]
+    data @tcShape@ = @vcTriangle@ @tcSide@ @tcSide@ @tcSide@
+               | @vcRectangle@ @tcSide@ @tcSide@
+               | @vcCircle@ @tcRadius@
+  \end{lstlisting}
+
+  \pause
+  A loose translation:
+  \begin{lstlisting}[style=hask]
+    enum @tcShape@ {
+      @vcTriangle@(Double side1, Double side2, Double side3),
+      @vcRectangle@(Double length, Double width),
+      @vcCircle@(Double radius)
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Multiple Value Constructor}
+  Recall \htycon{Side} $\sim$ \htycon{Radius} $\sim$ \htycon{Double}:
+  \begin{lstlisting}[style=hask]
+    data @tcShape@ = @vcTriangle@ @tcSide@ @tcSide@ @tcSide@
+               | @vcRectangle@ @tcSide@ @tcSide@
+               | @vcCircle@ @tcRadius@
+  \end{lstlisting}
+
+  \pause
+  \htycon{Types} of the \hvalcon{Value} constructors:
+  \begin{lstlisting}[style=hask]
+    @vcTriangle@  :: @tcSide@ -> @tcSide@ -> @tcSide@ -> @tcShape@
+    @vcRectangle@ :: @tcSide@ -> @tcSide@ -> @tcShape@
+    @vcCircle@    :: @tcRadius@ -> @tcShape@
+  \end{lstlisting}
+
+  \pause
+  Example \htycon{Shapes}:
+  \begin{lstlisting}[style=hask]
+    myTri, myRect, myCir :: @tcShape@
+    myTri  = @vcTriangle@ @vc2.1 3.2 5@
+    myRect = @vcRectangle@ @vc4 4@
+    myCir  = @vcCircle@ @vc7.2@
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Parametrization}
+  Types can parametrize over another type:
   \begin{lstlisting}[style=hask]
     data @tcIdentity@ a = @vcIdentity@ a
   \end{lstlisting}
 
   \pause
-  \ \\
-  A \textit{very} loose translation \tiny{(assuming capitalization implies constructor)}:
+  A loose translation:
   \begin{lstlisting}[style=hask]
     enum @tcIdentity@<T> {
       @vcIdentity@(T t)
     }
   \end{lstlisting}
-\end{frame}
 
-\begin{frame}[fragile]{Sum Types}
-  Simply, \htycon{Types} with more than one constructors.
+  \pause
+  The \htycon{Type} of the \hvalcon{Identity} constructor:
   \begin{lstlisting}[style=hask]
-    data Bool = False | True
-    data @tcWeekdays@ = @vcSunday@ | @vcMonday@ | @vcTuesday@ | @vcWednesday@
-                  | @vcThursday@ | @vcFriday@ | @vcSaturday@
-  \end{lstlisting}
+    @vcIdentity@ :: a -> @tcIdentity@ a
 
-  \ \\
-  Can parametrize over another type:
-  \begin{lstlisting}[style=hask]
-    data @tcIdentity@ a = @vcIdentity@ a
-  \end{lstlisting}
-
-  \ \\
-  And its \htycon{Type}:
-  \begin{lstlisting}[style=hask]
-    @vcIdentity@ :: a -> @tcIdentity t
+    intIdwrtSum :: @tcIndentity@ Int
+    intIdwrtSum = @vcIdentity@ @vc0@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Sum Types}
-  Another example:
+\begin{frame}[fragile]{Tuple}
+  Parametrize over 2 types - 2-tuple!
+  \begin{lstlisting}[style=hask]
+    data @tcTuple@ a b = @vcTuple@ a b
+    -- Actual built-in sugared version is something like:
+    -- data (,) a b = (a, b)
+  \end{lstlisting}
+
+  \pause
+  A loose translation:
+  \begin{lstlisting}[style=hask]
+    enum @tcTuple@<T1, T2> {
+      @vcTuple@(T1 t1, T2 t2)
+    }
+  \end{lstlisting}
+
+  \pause
+  With:
+  \begin{lstlisting}[style=hask]
+    @vcTuple@ :: a -> b -> @tcTuple@ a b
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Tuple}
+  Use the default sugared version:
+  \begin{lstlisting}[style=hask]
+    data (@tc,@) a b = (a@vc,@ b)
+  \end{lstlisting}
+
+  \pause
+  An example:
+  \begin{lstlisting}[style=hask]
+    type @tcEmployed@ = Bool
+
+    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEmployed@)
+    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ True)
+    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ False)
+    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ False)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Maybe}
+  Like \htycon{Bool}, but parametrize an $a$ over the \htycon{True} part:
   \begin{lstlisting}[style=hask]
     data Maybe a = Nothing | Just a
   \end{lstlisting}
 
   \pause
-  \ \\
-  The \textit{very} loose translation:
+  A loose translation:
   \begin{lstlisting}[style=hask]
     enum Maybe<T> {
       Nothing,
@@ -350,7 +488,6 @@
   \end{lstlisting}
 
   \pause
-  \ \\
   The \htycon{Types} of the two \hvalcon{Value} constructors:
   \begin{lstlisting}[style=hask]
     Nothing :: Maybe a
@@ -358,15 +495,32 @@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Sum Types}
-  A more involved example with \htycon{Either}:
+\begin{frame}[fragile]{Maybe}
+  From previous slide:
+  \begin{lstlisting}[style=hask]
+    data Maybe a = Nothing | Just a
+  \end{lstlisting}
+
+  \pause
+  Say more with the occupation:
+  \begin{lstlisting}[style=hask]
+    type @tcOccupation@ = Maybe String
+
+    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcOccupation@)
+    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ Just "dancer")
+    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing)
+    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ Just "pirate")
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Either}
+  Like \htycon{Bool}, but parametrize over both \hvalcon{True} and \hvalcon{False}:
   \begin{lstlisting}[style=hask]
     data Either a b = Left a | Right b
   \end{lstlisting}
 
   \pause
-  \ \\
-  Another \textit{very} loose translation:
+  A loose translation:
   \begin{lstlisting}[style=hask]
     enum Either<T1, T2> {
       Left(T1 t1),
@@ -375,7 +529,6 @@
   \end{lstlisting}
 
   \pause
-  \ \\
   The two \hvalcon{Value} constructors have \htycon{Types}:
   \begin{lstlisting}[style=hask]
     Left  :: a -> Either a b
@@ -383,19 +536,31 @@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Product Types}
+\begin{frame}[fragile]{Either}
+  From previous slide:
+  \begin{lstlisting}[style=hask]
+    data Either a b = Left a | Right b
+  \end{lstlisting}
+
+  \pause
+  Refine with more details:
+  \begin{lstlisting}[style=hask]
+    type @tcEarning@ = Either String Int
+
+    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEarning@)
+    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@
+              Right @vc100000@)
+    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
+              Left "Is a baby") 
+    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@
+              Right @vc2000000@)
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Types with Recursion}
 \end{frame}
 
 \begin{frame}[fragile]{Phantom Types}
-\end{frame}
-
-\begin{frame}[fragile]{Language Extension - GADTs}
-\end{frame}
-
-\begin{frame}[fragile]{Type Synonyms}
 \end{frame}
 
 
@@ -406,6 +571,47 @@
 \end{frame}
 
 \begin{frame}[fragile]{Higher-order Functions}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Type Theory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{What is Dependent Type}
+
+\begin{frame}[fragile]{Lambda Cube}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Dependent type programming in Haskell
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Steps toward Dependent Types}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Kinds}
+\begin{frame}[fragile]{Kinds}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Language Extensions}
+
+\begin{frame}[fragile]{GADTs}
+\end{frame}
+
+\begin{frame}[fragile]{KindSignatures}
+\end{frame}
+
+\begin{frame}[fragile]{ConstraintKinds}
+\end{frame}
+
+\begin{frame}[fragile]{Type Operators}
+\end{frame}
+
+\begin{frame}[fragile]{DataKinds}
+\end{frame}
+
+\begin{frame}[fragile]{Type Families}
 \end{frame}
 
 
