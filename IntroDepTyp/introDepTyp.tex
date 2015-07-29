@@ -1,9 +1,9 @@
 \documentclass[xcolor={usenames,dvipsnames}]{beamer}
 
 \usepackage[T1]{fontenc}
-\usepackage{totcount}
-\regtotcounter{section}
-\usepackage{multido}
+%\usepackage{totcount}
+%\regtotcounter{section}
+%\usepackage{multido}
 \usepackage{verbatim}
 \usepackage{listings}
 
@@ -15,19 +15,40 @@
 \usetheme{Antibes}
 \usecolortheme{beaver}
 
-\newcommand{\mytableofcontents}[0]{
-  \multido{\I=1+1}{\totvalue{section}}{
-    \begin{frame}<beamer>
-      \setcounter{section}{\I}
-      \frametitle{Outline}
-      \tableofcontents[
+% http://tex.stackexchange.com/questions/131515/show-hide-subsections-in-the-table-of-contents-of-a-beamer-presentation
+%\newcommand{\mytableofcontents}[0]{
+%  \multido{\I=1+1}{\totvalue{section}}{
+%    \begin{frame}<beamer>
+%      \setcounter{section}{\I}
+%      \frametitle{Outline}
+%      \tableofcontents[
+%      currentsection,
+%      sectionstyle=show/show,
+%      subsectionstyle=show/show/hide,
+%      ]
+%    \end{frame}
+%  }
+%  \setcounter{section}{0}
+%}
+% http://tex.stackexchange.com/questions/108898/beamer-presentation-show-toc-at-beginning-of-unnumbered-subsection-subsection
+%\AtBeginSection[
+%{\frame<beamer>{\frametitle{Outline}
+%    \tableofcontents[k}}
+%]
+%{\frame<beamer>{
+%    \frametitle{Outline}
+%    \tableofcontents[currentsection]}
+%}
+% https://www.sharelatex.com/learn/Beamer
+\AtBeginSection[] {
+  \begin{frame}
+    \frametitle{Section Outline}
+    \tableofcontents[
       currentsection,
-      sectionstyle=show/show,
-      subsectionstyle=show/show/hide,
-      ]
-    \end{frame}
-  }
-  \setcounter{section}{0}
+      sectionstyle=show/hide,
+      subsectionstyle=show/show/hide
+    ]
+  \end{frame}
 }
 \newcommand{\hkeyword}[1]{\textcolor{TealBlue}{\textsc{#1}}}
 \newcommand{\hfunction}[1]{\textcolor{Green}{\textsc{#1}}}
@@ -60,6 +81,7 @@
   moredelim=**[is][\color{Magenta}]{@cc}{@},
   moredelim=**[is][\color{OliveGreen}]{@tf}{@},
   moredelim=**[is][\color{Maroon}]{@str}{@},
+  moredelim=**[is][\color{Black}]{@o}{@},
   escapeinside={{@|}{@}},
   % Keywords
   emph=
@@ -78,13 +100,15 @@
   % type constructors
   emph=
   {[3]
-    Char,String,Bool,Int,Integer,Double,Float,Ordering,Maybe,Either,IO
+    Char,String,Bool,Int,Integer,Double,Float,Ordering,Maybe,Either,IO,
+    Nat, List
   },
   emphstyle={[3]\color{Blue}\textbf},
   emph=
   % value constructors
   {[4]
-    True,False,Nothing,Just,Left,Right,GT,LT,EQ
+    True,False,Nothing,Just,Left,Right,GT,LT,EQ,
+    Z, S, Nil, Cons
   },
   emphstyle={[4]\color{Red}\textbf},
   % type classes, contexts, constraints
@@ -109,7 +133,7 @@
   % foreign languages
   emph=
   {[8]
-    enum, interface
+    enum, interface, new
   },
   emphstyle={[8]\color{TealBlue}\textbf},
 }
@@ -129,10 +153,14 @@
 %%% Table of Content
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Want to hide subsection slide by slide
-%\begin{frame}{Table of Contents}
-%  \tableofcontents[pausesections]
-%\end{frame}
-\mytableofcontents
+\begin{frame}{Table of Contents}
+  \tableofcontents[
+    pausesections,
+    sectionstyle=show,
+    subsectionstyle=hide
+  ]
+\end{frame}
+%\mytableofcontents
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -253,8 +281,11 @@
 
   \begin{lstlisting}[style=hask]
     @|\ldots@, @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@, @|\dots@ :: Int @|\pause@
+
     True, False :: Bool @|\pause@
+
     @str'a'@, @str'b'@, @str'c'@ :: Char @|\pause@
+
     "abc" :: String @|$\sim$@ @tc[@Char@tc]@
 
   \end{lstlisting}
@@ -281,13 +312,13 @@
   What does the data structure looks like?
   \pause
   \begin{itemize}
-    \item Simple
-    \pause
     \item Multiple \hvalcon{Value} constructors
     \pause
     \item Paremetrize over another type
     \pause
-    \item Recursive
+    \item Recursive definition
+    \pause
+    \item A combination of the above
   \end{itemize}
 \end{frame}
 
@@ -305,7 +336,7 @@
 
   \pause
   \ \\
-  \htycon{Type} constructors and \hvalcon{Value} constructors are capticalized.
+  \htycon{Type} and \hvalcon{Value} constructors are capticalized.
 \end{frame}
 
 \begin{frame}[fragile]{Our First Example!}
@@ -329,7 +360,10 @@
     @vcPerson@ :: String -> String -> Int -> @tcPerson@
 
     bobby :: @tcPerson@
-    bobby = @vcPerson@ "Bobby" "Smith" @vc23@
+    bobby = @vcPerson@ "Bobby" "Smith" @vc23@ @|\pause@
+
+    -- a loose translation:
+    @tcPerson@ bobby = new @vcPerson@("Bobby", "Smith", 23)
   \end{lstlisting}
 \end{frame}
 
@@ -375,7 +409,7 @@
   \begin{lstlisting}[style=hask]
     enum @tcShape@ {
       @vcTriangle@(Double side1, Double side2, Double side3),
-      @vcRectangle@(Double length, Double width),
+      @vcRectangle@(Double @olength@, Double width),
       @vcCircle@(Double radius)
     }
   \end{lstlisting}
@@ -435,8 +469,6 @@
   Parametrize over 2 types - 2-tuple!
   \begin{lstlisting}[style=hask]
     data @tcTuple@ a b = @vcTuple@ a b
-    -- Actual built-in sugared version is something like:
-    -- data (,) a b = (a, b)
   \end{lstlisting}
 
   \pause
@@ -455,9 +487,11 @@
 \end{frame}
 
 \begin{frame}[fragile]{Tuple}
-  Use the default sugared version:
+  Actual built-in sugar:
   \begin{lstlisting}[style=hask]
-    data (@tc,@) a b = (a@vc,@ b)
+       data @tcTuple@ a b = @vcTuple@ a b
+    => data @vc(,)@ a b = @vc(,)@ a b
+    => data (a@tc,@ b) a b = @vc(@a@vc,@ b@vc)@
   \end{lstlisting}
 
   \pause
@@ -466,9 +500,9 @@
     type @tcEmployed@ = Bool
 
     barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEmployed@)
-    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ True)
-    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ False)
-    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ False)
+    barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@ True@vc)@
+    chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ False@vc)@
+    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@ False@)@
   \end{lstlisting}
 \end{frame}
 
@@ -507,9 +541,9 @@
     type @tcOccupation@ = Maybe String
 
     barbara, chet, luffy :: (@tcPerson@@tc,@ @tcOccupation@)
-    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ Just "dancer")
-    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing)
-    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ Just "pirate")
+    barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@ Just "dancer"@vc)@
+    chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing@vc)@
+    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@ Just "pirate"@vc)@
   \end{lstlisting}
 \end{frame}
 
@@ -548,19 +582,90 @@
     type @tcEarning@ = Either String Int
 
     barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEarning@)
-    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@
-              Right @vc100000@)
-    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
-              Left "Is a baby") 
-    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@
-              Right @vc2000000@)
+    barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@
+              Right @vc100000@@vc)@
+    chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
+              Left "Is a baby"@vc)@ 
+    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@
+              Right @vc2000000@@vc)@
   \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Types with Recursion}
+  Natural number:
+  \begin{lstlisting}[style=hask]
+    data Nat = Z | S Nat
+
+    Z :: Nat
+    S :: Nat -> Nat
+  \end{lstlisting}
+
+  \pause
+  A loose translation:
+  \begin{lstlisting}[style=hask]
+    enum Nat {
+      Z,
+      S(Nat)
+    }
+  \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Phantom Types}
+\begin{frame}[fragile]{Types with Recursion}
+  Natural number:
+  \begin{lstlisting}[style=hask]
+    data Nat = Z | S Nat
+
+    Z :: Nat
+    S :: Nat -> Nat
+
+    0 @|$\sim$@ Z
+    1 @|$\sim$@ S Z
+    2 @|$\sim$@ S (S Z)
+    3 @|$\sim$@ S (S (S Z))
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Types with Recursion}
+  List - recursive type while parametrize over another type:
+  \begin{lstlisting}[style=hask]
+    data List a = Nil | Cons a (List a)
+
+    Nil :: List a
+    Cons :: a -> List a -> List@ a
+  \end{lstlisting}
+
+  \pause
+  A loose translation:
+  \begin{lstlisting}[style=hask]
+    enum List<T> {
+      Nil,
+      Cons(T, List<T>)
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Types with Recursion}
+  Actual built-in sugared version is something like:
+  \begin{lstlisting}[style=hask]
+       data List a = Nil | Cons a (List a)
+       data @tc[]@ a = @vc[]@ | @vc(:)@ a (@tc[]@ a)
+    => data @tc[@a@tc]@ = @vc[]@ | a @vc:@ @tc[@a@tc]@
+  \end{lstlisting}
+
+  \pause
+  De-sugar that list:
+  \begin{lstlisting}[style=hask]
+    ints :: List Int 
+    ints = Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))
+
+    -- built-in sugar
+    ints :: @tc[]@ Int
+    ints = 1 @vc:@ 2 @vc:@ 3 @vc:@ 4 @vc:@ @vc[]@
+
+    -- 2x the sugar!
+    ints :: @tc[@Int@tc]@
+    ints = @vc[@1, 2, 3, 4@vc]@
+  \end{lstlisting}
 \end{frame}
 
 
