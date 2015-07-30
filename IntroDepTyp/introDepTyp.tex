@@ -33,7 +33,7 @@
 % http://tex.stackexchange.com/questions/108898/beamer-presentation-show-toc-at-beginning-of-unnumbered-subsection-subsection
 %\AtBeginSection[
 %{\frame<beamer>{\frametitle{Outline}
-%    \tableofcontents[k}}
+%    \tableofcontents[currentsection]}}
 %]
 %{\frame<beamer>{
 %    \frametitle{Outline}
@@ -86,7 +86,8 @@
   % Keywords
   emph=
   {[1]
-    module,import,qualified,hiding,as,foreign,infix,infixr,infixl,
+    % as didn't make it due to a:as
+    module,import,qualified,hiding,foreign,infix,infixr,infixl,
     where,let,in,case,of,if,then,else,do,rec,proc,forall,pi,
     type,newtype,data,family,class,instance,deriving,default
   },
@@ -94,7 +95,7 @@
   % functions
   emph=
   {[2]
-    map,filter,foldr,length,fmap,id
+    placeholder
   },
   emphstyle={[2]\color{Green}},
   % type constructors
@@ -133,7 +134,7 @@
   % foreign languages
   emph=
   {[8]
-    enum, interface, new
+    enum, interface, new, static, switch, return
   },
   emphstyle={[8]\color{TealBlue}\textbf},
 }
@@ -243,11 +244,11 @@
 
   \begin{lstlisting}[style=hask]
       {- block comment -}
-      @ffoo@ :: Bool -> Int -> String
-      @ffoo@ False @vc0@ = "Bad"
-      @ffoo@ True  @vc0@ = "Questionable"
-      @ffoo@ False n = "Fake"
-      @ffoo@ True  n = "Read"
+      foo :: Bool -> Int -> String
+      foo False @vc0@ = "Bad"
+      foo True  @vc0@ = "Questionable"
+      foo False n = "Fake"
+      foo True  n = "Read"
   \end{lstlisting}
 \end{frame}
 
@@ -256,19 +257,19 @@
 
   \begin{lstlisting}[style=hask]
     {-# LANGUAGE KitchenSink #-}
-    @fzipWith@ :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@ @|\pause@
-    @fzipWith@ _ @vc[]@     _      = @vc[]@ @|\pause@
-    @fzipWith@ _ _      @vc[]@     = @vc[]@ @|\pause@
-    @fzipWith@ f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ @fzipWith@ f xs ys
+    zipWith :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@ @|\pause@
+    zipWith _ @vc[]@     _      = @vc[]@ @|\pause@
+    zipWith _ _      @vc[]@     = @vc[]@ @|\pause@
+    zipWith f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ zipWith f xs ys
   \end{lstlisting}
 
   better yet
 
   \begin{lstlisting}[style=hask]
     {-# LANGUAGE KitchenSink #-}
-    @fzipWith@ :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@
-    @fzipWith@ f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ @fzipWith@ f xs ys
-    @fzipWith@ _ _      _      = @vc[]@
+    zipWith :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@
+    zipWith f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ zipWith f xs ys
+    zipWith _ _      _      = @vc[]@
   \end{lstlisting}
 \end{frame}
 
@@ -309,7 +310,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{About Types}
-  What does the data structure looks like?
+  What are the data types like?
   \pause
   \begin{itemize}
     \item Multiple \hvalcon{Value} constructors
@@ -317,6 +318,8 @@
     \item Paremetrize over another type
     \pause
     \item Recursive definition
+    \pause
+    \item Synonyms of other types
     \pause
     \item A combination of the above
   \end{itemize}
@@ -409,7 +412,7 @@
   \begin{lstlisting}[style=hask]
     enum @tcShape@ {
       @vcTriangle@(Double side1, Double side2, Double side3),
-      @vcRectangle@(Double @olength@, Double width),
+      @vcRectangle@(Double length, Double width),
       @vcCircle@(Double radius)
     }
   \end{lstlisting}
@@ -450,8 +453,8 @@
   \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum @tcIdentity@<T> {
-      @vcIdentity@(T t)
+    enum @tcIdentity@<A> {
+      @vcIdentity@(A a)
     }
   \end{lstlisting}
 
@@ -474,8 +477,8 @@
   \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum @tcTuple@<T1, T2> {
-      @vcTuple@(T1 t1, T2 t2)
+    enum @tcTuple@<A, B> {
+      @vcTuple@(A a, B b)
     }
   \end{lstlisting}
 
@@ -490,8 +493,8 @@
   Actual built-in sugar:
   \begin{lstlisting}[style=hask]
        data @tcTuple@ a b = @vcTuple@ a b
-    => data @vc(,)@ a b = @vc(,)@ a b
-    => data (a@tc,@ b) a b = @vc(@a@vc,@ b@vc)@
+    => data @tc(,)@ a b = @vc(,)@ a b
+    => data @tc(@a@tc,@ b@tc)@ = @vc(@a@vc,@ b@vc)@
   \end{lstlisting}
 
   \pause
@@ -499,10 +502,10 @@
   \begin{lstlisting}[style=hask]
     type @tcEmployed@ = Bool
 
-    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEmployed@)
+    barbara, chet, luffy :: @tc(@@tcPerson@@tc,@ @tcEmployed@@tc)@
     barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@ True@vc)@
     chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ False@vc)@
-    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@ False@)@
+    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@ False@vc)@
   \end{lstlisting}
 \end{frame}
 
@@ -515,9 +518,9 @@
   \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum Maybe<T> {
+    enum Maybe<A> {
       Nothing,
-      Just(T t)
+      Just(A a)
     }
   \end{lstlisting}
 
@@ -540,7 +543,7 @@
   \begin{lstlisting}[style=hask]
     type @tcOccupation@ = Maybe String
 
-    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcOccupation@)
+    barbara, chet, luffy :: @tc(@@tcPerson@@tc,@ @tcOccupation@@tc)@
     barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@ Just "dancer"@vc)@
     chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing@vc)@
     luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@ Just "pirate"@vc)@
@@ -556,9 +559,9 @@
   \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum Either<T1, T2> {
-      Left(T1 t1),
-      Right(T2 t2)
+    enum Either<A, B> {
+      Left(A a),
+      Right(B b)
     }
   \end{lstlisting}
 
@@ -581,7 +584,7 @@
   \begin{lstlisting}[style=hask]
     type @tcEarning@ = Either String Int
 
-    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEarning@)
+    barbara, chet, luffy :: @tc(@@tcPerson@@tc,@ @tcEarning@@tc)@
     barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@
               Right @vc100000@@vc)@
     chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
@@ -605,7 +608,7 @@
   \begin{lstlisting}[style=hask]
     enum Nat {
       Z,
-      S(Nat)
+      S(Nat n)
     }
   \end{lstlisting}
 \end{frame}
@@ -631,15 +634,15 @@
     data List a = Nil | Cons a (List a)
 
     Nil :: List a
-    Cons :: a -> List a -> List@ a
+    Cons :: a -> List a -> List a
   \end{lstlisting}
 
   \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum List<T> {
+    enum List<A> {
       Nil,
-      Cons(T, List<T>)
+      Cons(A a, List<A> as)
     }
   \end{lstlisting}
 \end{frame}
@@ -648,7 +651,7 @@
   Actual built-in sugared version is something like:
   \begin{lstlisting}[style=hask]
        data List a = Nil | Cons a (List a)
-       data @tc[]@ a = @vc[]@ | @vc(:)@ a (@tc[]@ a)
+    => data @tc[]@ a = @vc[]@ | @vc(:)@ a (@tc[]@ a)
     => data @tc[@a@tc]@ = @vc[]@ | a @vc:@ @tc[@a@tc]@
   \end{lstlisting}
 
@@ -673,16 +676,184 @@
 \subsection{Functions}
 
 \begin{frame}[fragile]{Functions}
+  Maps \hvalcon{Values} of a \htycon{Type} to another \htycon{Type}:
+  \begin{lstlisting}[style=hask]
+    even :: Int -> Bool
+    even @vc0@ = True
+    even n = if rem n 2 == @vc0@
+             then True
+             else False
+  \end{lstlisting}
+
+  \pause
+  Not as loose translation:
+  \begin{lstlisting}[style=hask]
+    static Bool even (Int n) {
+      switch n:
+        case n == 0:
+          return True;
+        default:
+          if rem@(n, 2) == 0
+            return True;
+          else
+            return False;
+    }
+  \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Functions with Recursion}
+  Use recursion for recursive types:
+  \begin{lstlisting}[style=hask]
+    toInt :: Nat -> Int
+    toInt Z     = @vc0@
+    toInt (S n) = @vc1@ + toInt n
+  \end{lstlisting}
+
+  \pause
+  Not as loose translation:
+  \begin{lstlisting}[style=hask]
+    static Int toInt (Nat n) {
+      switch n:
+        case Z:
+          return @vc0@;
+        case (S m):  -- n @|$\sim$@ (S m)
+          return @vc1@ + toInt(m);
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Functions with Parametric Polymorphism}
+  Functions can be parametric:
+  \begin{lstlisting}[style=hask]
+    id :: a -> a
+    id a = a
+  \end{lstlisting}
+
+  \pause
+  Not as loose translation:
+  \begin{lstlisting}[style=hask]
+    static A id<A>(A a) {
+      return a;
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Functions with Parametric Polymorphism}
+  Functions can be parametric:
+  \begin{lstlisting}[style=hask]
+    append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
+    append @vc[]@     ys = ys
+    append (x@vc:@xs) ys = x @vc:@ append xs ys
+  \end{lstlisting}
+
+  \pause
+  A translation:
+  \begin{lstlisting}[style=hask]
+    static List<A> append(List<A> l1, List<A> l2) {
+      switch l1:
+        case Nil:
+          return l2;
+        case Cons(x, xs):
+          List<A> rest = append(xs, l2);
+          return Cons(x, rest);
+    }
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Higher-order Functions}
+  Functions that take functions as params:
+  \begin{lstlisting}[style=hask]
+    ($) :: (a -> b) -> a -> b
+    f $ x = f x
+
+    (.) :: (b -> c) -> (a -> b) -> (a -> c)
+    f . g = \x -> f (g x)
+  \end{lstlisting}
+
+  \pause
+  Yay translations:
+  \begin{lstlisting}[style=hask]
+    static B apply(Func<A, B> f, A a) {
+      return f(a);
+    }
+
+    static Func<A,C> compose(Func<B,C> f, Func<A,B> g) {
+      return x => f(g(x));
+    }
+  \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]{More Functions Examples}
+  $map$:
+  \begin{lstlisting}[style=hask]
+    map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
+    map f @vc[]@     = @vc[]@
+    map f (x@vc:@xs) = f x @vc:@ map f xs
+  \end{lstlisting}
+
+  \pause
+  A translation:
+  \begin{lstlisting}[style=hask]
+    static List<B> map(Func<A,B> f, List<A> la) {
+      switch la:
+        case Nil:
+          return Nil;
+        case Cons(a, as):
+          B b = f(a)
+          List<B> rest = map(f, as);
+          return Cons(b, rest);
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{More Functions Examples}
+  $zip$:
+  \begin{lstlisting}[style=hask]
+    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[(@a@tc,@b@tc)]@
+    zip @vc[]@     ys     = @vc[]@
+    zip xs     @vc[]@     = @vc[]@
+    zip (x@vc:@xs) (y@vc:@ys) = @vc(@x@vc,@y@vc)@ @vc:@ zip xs ys
+  \end{lstlisting}
+
+  \pause
+  A translation:
+  \begin{lstlisting}[style=hask]
+    static List<@tcTuple@<A,B>> zip(List<A> l1, List<A> l2) {
+      switch l1:
+        case Nil:
+          return Nil;
+        case Cons(a, as):
+          switch l2:
+            case Nil:
+              return Nil;
+            case Cons(b, bs):
+              @tcTuple@<A,B> front = @vcTuple@(a, b);
+              List<@tcTuple@<A,B>> rest = zip(as, bs);
+              return Cons(front, rest);
+    }
+  \end{lstlisting}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Type Theory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{What is Dependent Type}
+
+\begin{frame}[fragile]{Lambda Calculus}
+  So far, we have seen:
+  \pause
+  \begin{itemize}
+    \item function application
+    \item function abstraction {\tiny(aka higher-order functions)}
+    \pause
+    \item variable binding
+    \pause
+    \item substitution
+  \end{itemize}
+  \pause
+  => basis for $\lambda-calculus$.
+\end{frame}
 
 \begin{frame}[fragile]{Lambda Cube}
 \end{frame}
