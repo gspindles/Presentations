@@ -220,61 +220,6 @@
 \section{Review of Basics}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Test}
-% Test highlighting examples
-\begin{frame}[fragile]{Test}
-  Syntax highlighting test reference, to be removed later.
-
-  \begin{lstlisting}[style=hask]
-      -- Comment
-      data Maybe a = Nothing | Just a
-                     deriving (Show, Eq)
- 
-      fmap :: Functor f => (a -> b) -> f a -> f b
-      map _ @vc[]@     = @vc[]@
-      map f (x@vc:@xs) = f x @vc:@ map f xs
- 
-      type family @tfTF@ a :: @dk*@
-      type instance @tfTF@ Int = Bool
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Test}
-  Couldn't quite yet get listing to work with overlay yet.
-
-  \begin{lstlisting}[style=hask]
-      {- block comment -}
-      foo :: Bool -> Int -> String
-      foo False @vc0@ = "Bad"
-      foo True  @vc0@ = "Questionable"
-      foo False n = "Fake"
-      foo True  n = "Read"
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Test}
-  Pausing within listing is ok?
-
-  \begin{lstlisting}[style=hask]
-    {-# LANGUAGE KitchenSink #-}
-    zipWith :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@ @|\pause@
-    zipWith _ @vc[]@     _      = @vc[]@ @|\pause@
-    zipWith _ _      @vc[]@     = @vc[]@ @|\pause@
-    zipWith f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ zipWith f xs ys
-  \end{lstlisting}
-
-  better yet
-
-  \begin{lstlisting}[style=hask]
-    {-# LANGUAGE KitchenSink #-}
-    zipWith :: (a -> b -> c) -> @vc[@a@vc]@ -> @vc[@b@vc]@ -> @vc[@c@vc]@
-    zipWith f (x@vc:@xs) (y@vc:@ys) = f x y @vc:@ zipWith f xs ys
-    zipWith _ _      _      = @vc[]@
-  \end{lstlisting}
-\end{frame}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Values and Types}
 
 \begin{frame}[fragile]{Values and Types}
@@ -693,14 +638,13 @@
         case n == 0:
           return True;
         default:
-          if rem@(n, 2) == 0
+          if rem(n, 2) == 0
             return True;
           else
             return False;
     }
   \end{lstlisting}
 \end{frame}
-
 
 \begin{frame}[fragile]{Functions with Recursion}
   Use recursion for recursive types:
@@ -720,6 +664,18 @@
         case (S m):  -- n @|$\sim$@ (S m)
           return @vc1@ + toInt(m);
     }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Type of Functions}
+  Q: Actual type of functions?\\
+  \pause
+  A: Build in magic, it's called the $function\ arrow$, something like:
+  \begin{lstlisting}[style=hask]
+    data (->) a b = implementation
+
+    even  :: Int @tc->@ Bool
+    toInt :: Nat @tc->@ Int
   \end{lstlisting}
 \end{frame}
 
@@ -764,11 +720,13 @@
 \begin{frame}[fragile]{Higher-order Functions}
   Functions that take functions as params:
   \begin{lstlisting}[style=hask]
-    ($) :: (a -> b) -> a -> b
-    f $ x = f x
+    -- actual name is ($)
+    apply :: (a -> b) -> a -> b
+    apply f x = f x
 
-    (.) :: (b -> c) -> (a -> b) -> (a -> c)
-    f . g = \x -> f (g x)
+    -- acutal name is (.)
+    compose :: (b -> c) -> (a -> b) -> (a -> c)
+    compose f g = \x -> f (g x)
   \end{lstlisting}
 
   \pause
@@ -840,7 +798,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{What is Dependent Type}
 
-\begin{frame}[fragile]{Lambda Calculus}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{$\lambda$-Calculus}
+
+\begin{frame}[fragile]{$\lambda$-Calculus}
   So far, we have seen:
   \pause
   \begin{itemize}
@@ -852,11 +813,90 @@
     \item substitution
   \end{itemize}
   \pause
-  => basis for $\lambda-calculus$.
+  => basis for simply typed $\lambda$-calculus.
 \end{frame}
 
-\begin{frame}[fragile]{Lambda Cube}
+
+\begin{frame}[fragile]{$\lambda$-Calculus}
+  Q: Sure, but can we have more?
+  \ \\
+  \pause
+  A: Yes, extend $\lambda$-calculus so we can have more forms of abstractions.
+
+  \ \\
+  \pause
+  Q: But how?\\
+  \pause
+  A: What if I told you\ldots\\
+  \pause
+  \qquad \ldots you already know at least 2 axes of extension :)
 \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Extensions on $\lambda$-calculus}
+
+\begin{frame}[fragile]{Subtype Polymorphism}
+  Given data types \htycon{$T$} and \htycon{$P$}, if there is a relation between \htycon{$T$} and \htycon{$P$} by some notion of substitutability with \htycon{$T$} in place of \htycon{$P$}, then we say \htycon{$T$} is a \textit{subtype} of the \textit{supertype} \htycon{$P$}, denoted by \htycon{$T$} $<:$ \htycon{$P$}.
+
+  \ \\
+  \pause
+  The name for this extension of $\lambda$-calculus is called \textit{subtype polymorphism} and is denoted by $\lambda_{<:}$.\\
+  \pause
+  => Object Oriented Programming.
+  
+  \ \\
+  \pause
+  Though this is not an axis that we are interested in.
+\end{frame}
+
+\begin{frame}[fragile]{Parametric Polymorphism}
+  Introduce a mechanism of universal quantification over \htycon{Types}: \htycon{Types} can abstract over \htycon{Types}, allows for \textit{generic data types} and \textit{generic functions}.\\
+  \pause
+  => Generic Programming.
+
+  \ \\
+  \pause
+  Recall:
+  \begin{lstlisting}[style=hask]
+    data @tc[@a@tc]@ = @vc[]@ | @vc(:)@ a @vc[@a@vc]@
+
+    id :: a -> a
+    map :: (a -> b) -> @vc[@a@vc]@ -> @vc[@b@vc]@
+  \end{lstlisting}
+
+  \pause
+  The name for this extension is formally \textit{second order} $\lambda$\textit{-calculus}, aka \textit{System F}, denoted by $\lambda2$,
+\end{frame}
+
+\begin{frame}[fragile]{Value and Type Dependency}
+  Rethinking function \textit{f :: a -> b}:\\
+  \qquad f maps \hvalcon{Values} of \htycon{Type} $a$ to \hvalcon{Values} of \htycon{Type} $b$\\
+  => \hvalcon{Values} of \htycon{Type} $b$ that we get depends on the \hvalcon{Value} of \htycon{Type} $a$ the function takes in\\
+  => \hvalcon{Values} depending on \hvalcon{Values}
+
+  \ \\
+  \pause
+  \begin{lstlisting}[style=hask]
+    even   :: Int -> Bool
+    length :: [a] -> Int
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Value and Type Dependency}
+  Then what about the other cases of dependencies?
+  \pause
+  \begin{itemize}
+    \item \hvalcon{Values} depending on \hvalcon{Values}: function
+    \pause
+    \item \hvalcon{Values} depending on \htycon{Types}: parametric polymorphism
+    \pause
+    \item \htycon{Types} depending on \hvalcon{Types}: type operators
+    \pause
+    \item \htycon{Types} depending on \hvalcon{Values}: dependent types
+  \end{itemize}
+\end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Dependent type programming in Haskell
