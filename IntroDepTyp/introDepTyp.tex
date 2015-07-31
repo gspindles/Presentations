@@ -52,7 +52,7 @@
 }
 \newcommand{\hkeyword}[1]{\textcolor{TealBlue}{\textsc{#1}}}
 \newcommand{\hfunction}[1]{\textcolor{Green}{\textsc{#1}}}
-\newcommand{\htycon}[1]{\textcolor{Blue}{\textsc{#1}}}
+\newcommand{\htycon}[1]{\textcolor{MidnightBlue}{\textsc{#1}}}
 \newcommand{\hvalcon}[1]{\textcolor{Red}{\textsc{#1}}}
 \newcommand{\hkind}[1]{\textcolor{Fuchsia}{\textsc{#1}}}
 \newcommand{\hclass}[1]{\textcolor{Magenta}{\textsc{#1}}}
@@ -75,7 +75,7 @@
   showtabs=false,
   moredelim=**[is][\color{TealBlue}]{@kw}{@},
   moredelim=**[is][\color{Green}]{@f}{@},
-  moredelim=**[is][\color{Blue}]{@tc}{@},
+  moredelim=**[is][\color{MidnightBlue}]{@tc}{@},
   moredelim=**[is][\color{Red}]{@vc}{@},
   moredelim=**[is][\color{Fuchsia}]{@dk}{@},
   moredelim=**[is][\color{Magenta}]{@cc}{@},
@@ -89,7 +89,7 @@
     % as didn't make it due to a:as
     module,import,qualified,hiding,foreign,infix,infixr,infixl,
     where,let,in,case,of,if,then,else,do,rec,proc,forall,pi,
-    type,newtype,data,family,class,instance,deriving,default
+    type,newtype,data,family,kind,class,instance,deriving,default
   },
   emphstyle={[1]\color{TealBlue}\textbf},
   % functions
@@ -104,11 +104,11 @@
     Char,String,Bool,Int,Integer,Double,Float,Ordering,Maybe,Either,IO,
     List, Vec
   },
-  emphstyle={[3]\color{Blue}\textbf},
+  emphstyle={[3]\color{MidnightBlue}\textbf},
   emph=
   % value constructors
   {[4]
-    True,False,Nothing,Just,Left,Right,GT,LT,EQ,
+    True,False,Nothing,Just,Left,Right,LT,EQ,GT,
     Nil, Cons, VNil, VCons
   },
   emphstyle={[4]\color{Red}\textbf},
@@ -175,16 +175,12 @@
 
 \begin{frame}{A Joke}
   This is not a \texttt{m-} tutorial.
-
   \pause
-
   Nor is it a \texttt{lens} tutorial
   \pause
   (aka the new new \texttt{m-} tutorial\ldots
-
   \pause
   \ldots because \texttt{arrows} \textit{were} the new \texttt{m-} tutorials).
-
 \end{frame}
 
 
@@ -194,6 +190,7 @@
     \ \\
     \pause
     Because of that, it's harder to see the build up, so we won't be directly using them in this talk.
+
     \ \\
     \ \\
     \pause
@@ -542,7 +539,7 @@
 \begin{frame}[fragile]{Types with Recursion}
   Natural number:
   \begin{lstlisting}[style=hask]
-    data @tcNat@ = @vcZ@ | @vcS@ @tyNat@
+    data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
 
     @vcZ@ :: @tcNat@
     @vcS@ :: @tcNat@ -> @tcNat@
@@ -551,9 +548,9 @@
   \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum @tyNat@ {
+    enum @tcNat@ {
       @vcZ@,
-      @vcS@(@tyNat@ n)
+      @vcS@(@tcNat@ n)
     }
   \end{lstlisting}
 \end{frame}
@@ -596,8 +593,8 @@
   Actual built-in sugar is something like:
   \begin{lstlisting}[style=hask]
        data List a = Nil | Cons a (List a)
-    => data @tc[]@ a = @vc[]@ | @vc(:)@ a (@tc[]@ a)
-    => data @tc[@a@tc]@ = @vc[]@ | a @vc:@ @tc[@a@tc]@
+    => data @tc[]@ a = @vc[]@ | (@vc:@) a (@tc[]@ a)
+    => data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @tc[@a@tc]@
   \end{lstlisting}
 
   \pause
@@ -633,7 +630,7 @@
   \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
-    static Bool even (Int n) {
+    Bool even (Int n) {
       switch n:
         case n == 0:
           return True;
@@ -657,7 +654,7 @@
   \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
-    static Int toInt (@tcNat@ n) {
+    Int toInt (@tcNat@ n) {
       switch n:
         case @vcZ@:
           return @vc0@;
@@ -689,7 +686,7 @@
   \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
-    static A id<A>(A a) {
+    A id<A>(A a) {
       return a;
     }
   \end{lstlisting}
@@ -706,7 +703,7 @@
   \pause
   A translation:
   \begin{lstlisting}[style=hask]
-    static List<A> append(List<A> l1, List<A> l2) {
+    List<A> append(List<A> l1, List<A> l2) {
       switch l1:
         case Nil:
           return l2;
@@ -732,11 +729,11 @@
   \pause
   Yay translations:
   \begin{lstlisting}[style=hask]
-    static B apply(Func<A, B> f, A a) {
+    B apply(Func<A,B> f, A a) {
       return f(a);
     }
 
-    static Func<A,C> compose(Func<B,C> f, Func<A,B> g) {
+    Func<A,C> compose(Func<B,C> f, Func<A,B> g) {
       return x => f(g(x));
     }
   \end{lstlisting}
@@ -753,7 +750,7 @@
   \pause
   A translation:
   \begin{lstlisting}[style=hask]
-    static List<B> map(Func<A,B> f, List<A> la) {
+    List<B> map(Func<A,B> f, List<A> la) {
       switch la:
         case Nil:
           return Nil;
@@ -777,7 +774,7 @@
   \pause
   A translation:
   \begin{lstlisting}[style=hask]
-    static List<@tcTuple@<A,B>> zip(List<A> l1, List<A> l2) {
+    List<@tcTuple@<A,B>> zip(List<A> l1, List<A> l2) {
       switch l1:
         case Nil:
           return Nil;
@@ -816,10 +813,8 @@
   => basis for simply typed $\lambda$-calculus.
 \end{frame}
 
-
 \begin{frame}[fragile]{$\lambda$-Calculus}
-  Q: Sure, but can we have more?
-  \ \\
+  Q: Sure, but can we have more?\\
   \pause
   A: Yes, extend $\lambda$-calculus so we can have more forms of abstractions.
 
@@ -859,7 +854,7 @@
   \pause
   Recall:
   \begin{lstlisting}[style=hask]
-    data @tc[@a@tc]@ = @vc[]@ | @vc(:)@ a @vc[@a@vc]@
+    data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @vc[@a@vc]@
 
     id :: a -> a
     map :: (a -> b) -> @vc[@a@vc]@ -> @vc[@b@vc]@
@@ -872,10 +867,6 @@
 \begin{frame}[fragile]{Value and Type Interdependency}
   Re-thinking functions:
   \begin{lstlisting}[style=hask]
-    data Bool = False | True
-    -- built-in magic: infinitely many value constructors
-    data Int = ... | @vc-1@ | @vc0@ | @vc1@ | @vc2@ | ... 
-
     even :: Int -> Bool
     even @vc0@ = True
     even n = if rem n @vc2@ == @vc0@
@@ -937,11 +928,22 @@
   \includegraphics[scale=0.6]{Lambda_cube.png}
 \end{frame}
 
+\begin{frame}[fragile]{Pi and Sigma Types}
+  $\Pi$-type - quantification of values on type level
+  \begin{lstlisting}[style=hask]
+  \end{lstlisting}
+
+  \pause
+  $\Sigma$-type - dependent pair
+  \begin{lstlisting}[style=hask]
+  \end{lstlisting}
+\end{frame}
+
 \begin{frame}[fragile]{System $F_c$}
   Currently, Haskell as of GHC 7.10.2 doesnot have true type operators.  Achieves type-level programming through \textit{type families} and equalities on \htycon{Types}.  This axis of extension on $\lambda2$ is termed \text{System} $F_c$.
   \ \\
   \pause
-  This, plus a \hkind{Kind} system, a handful of \textit{language extensions}, we are ready fake dependent types in Haskell.
+  This, plus a \hkind{Kind} system, and a handful of \textit{language extensions}, we are ready fake dependent types in Haskell.
 \end{frame}
 
 \begin{frame}[fragile]{Teaser}
@@ -949,10 +951,10 @@
   \begin{lstlisting}[style=hask]
     data Vec (n :: @dkNat@) a where
       VNil :: Vec @tc0@ a
-      (@vc<:@) :: a -> Vec n a -> Vec (n @tf+@ @tc1@) a
+      (@vc:>@) :: a -> Vec n a -> Vec (n @tf+@ @tc1@) a
 
     vs :: Vec @tc6@ Int
-    vs = 4 @vc<:@ 8 @vc<:@ 15 @vc<:@ 16 @vc<:@ 23 @vc<:@ 42 @vc<:@ VNil
+    vs = 4 @vc:>@ 8 @vc:>@ 15 @vc:>@ 16 @vc:>@ 23 @vc:>@ 42 @vc:>@ VNil
   \end{lstlisting}
 
   \pause
@@ -976,20 +978,129 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Kinds}
+
 \begin{frame}[fragile]{Kinds}
+  Q: \htycon{Types} classify \hvalcon{Values}, but what classifies \htycon{Types}?\\
+  A: \hkind{Kinds}
+\end{frame}
+
+\begin{frame}[fragile]{Introducing $\star$}
+  \begin{lstlisting}[style=hask]
+    -- built-in magic: infinitely many value constructors
+    data Int = @|\ldots@ | @vc-1@ | @vc0@ | @vc1@ | @vc2@ | @|\ldots@
+    data Bool = False | True
+    data @tc[@a@tc]@ = Nil | (@vc:@) a @vc[@a@vc]@
+    data Maybe a = Nothing | Just a
+    data Either a b = Left a | Right b
+
+    @|\pause@
+    Int :: @dk*@@|\pause@
+    Bool :: @|\pause@@dk*@@|\pause@
+    @tc[@Int@tc]@ :: @|\pause@@dk*@@|\pause@
+    @tc[]@ :: @|\pause@@dk*@ -> @dk*@@|\pause@
+    Maybe @tcPerson@ :: @|\pause@@dk*@@|\pause@
+    Maybe :: @|\pause@@dk*@ -> @dk*@@|\pause@
+    Either String @tcEarning@ :: @|\pause@@dk*@@|\pause@
+    Either String :: @|\pause@@dk*@ -> @dk*@@|\pause@
+    Either :: @|\pause@@dk*@ -> @dk*@ -> @dk*@
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Introducing Constraint}
+  Haskell has $typeclasses$ that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this typeclass instance can be used to provide context for functions.
+  \pause
+  \begin{lstlisting}[style=hask]
+    Show -- types that can be serialized to String@|\pause@
+    Eq   -- types that can be compared for equality@|\pause@
+    Ord  -- types that can be ordered@|\pause@
+    Num  -- types that are like numbers: +, -, *, @|\ldots@
+         -- and many others
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Introducing Constraint}
+  An example:
+  \begin{lstlisting}[style=hask]
+    data Ordering = LT | EQ | GT
+
+    show      :: Show a => a -> String  -- toString()
+    (==)      :: Eq a => a -> a -> Bool
+    compare   :: Ord a => a -> a -> Ordering
+    (+)       :: Num a => a -> a -> a
+    sequenceA :: (Applicative f, Traversable t) => t (f a) -> f (t a)
+  \end{lstlisting}
+
+  \pause
+  A loose translation with : for implements:
+  \begin{lstlisting}[style=hask]
+    enum Ordering { LT, EQ, GT }
+
+    String show<A>(A a) where A : Show
+    Bool equals<A>(A a, A a) where A : Eq
+    Ordering compare<A>(A a, A a) where A : Ordering
+    A plus<A>(A a, A a) where A : Num
+    F<T<_>> sequenceA<F,T>(T<F<_>> tfa) where F : Applicative, T : Traversable
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Introducing Constraint}
+  These \hclass{Typeclass} contexts have \hkind{Kind} \hkind{Constraint}.
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE ConstraintKinds #-}
+
+    type @ccShowCxt@ a b = (Show a, Show b)
+
+    sameSerialization :: @ccShowContxt@ a b => a -> b -> Bool
+    sameSerialization a b = show a == show b
+
+    @ccShowCxt@ :: @dk*@ -> @dk*@ -> Constraint
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Other Kinds}
+  There are other \hkind{Kinds} aside from \hkind{*} and \hkind{Constraint}
+  \begin{lstlisting}[style=hask]
+    import GHC.Prim
+    
+    (@dk*@)         -- kind of fully realized type
+    (@dk#@)         -- kind of unboxed stuff used internally
+    Constraint  -- kind of constraints and type equality
+    OpenKind    -- superkind of (*) and (#)
+    AnyK        -- polymorphic kind for flexible arity
+    @|\pause@
+    -- the only sort, sorts classify kinds
+    (@dk*@), (@dk#@), Constraint, OpenKind, AnyK :: BOX
+    BOX :: BOX
+  \end{lstlisting}
+
+  All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2.
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Language Extensions}
 
+\begin{frame}[fragile]{Language Extensions}
+  Compiler extensions that enable a variety of new functionalities:
+  \pause
+  \begin{itemize}
+    \item Syntax extension
+    \item Type-level programming
+    \item Generic programming
+    \item FFI
+    \item Type disambiguation
+    \item Typeclass extension
+  \end{itemize}
+
+  \ \\
+  \pause
+  Each extension has a name, and is enabled with the LANGUAGE pragma.
+\end{frame}
+
 \begin{frame}[fragile]{GADTs}
 \end{frame}
 
 \begin{frame}[fragile]{KindSignatures}
-\end{frame}
-
-\begin{frame}[fragile]{ConstraintKinds}
 \end{frame}
 
 \begin{frame}[fragile]{Type Operators}
