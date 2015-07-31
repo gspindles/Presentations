@@ -102,14 +102,14 @@
   emph=
   {[3]
     Char,String,Bool,Int,Integer,Double,Float,Ordering,Maybe,Either,IO,
-    Nat, List
+    List, Vec
   },
   emphstyle={[3]\color{Blue}\textbf},
   emph=
   % value constructors
   {[4]
     True,False,Nothing,Just,Left,Right,GT,LT,EQ,
-    Z, S, Nil, Cons
+    Nil, Cons, VNil, VCons
   },
   emphstyle={[4]\color{Red}\textbf},
   % type classes, contexts, constraints
@@ -247,7 +247,7 @@
     \pause
     \item Some are built in sugar: list, tuples
       \begin{itemize}
-        \item We can define equivalent non-sugar-ed version ourselves
+        \item We can define equivalent non-sugar version ourselves
       \end{itemize}
     \pause
     \item Rest can be user defined: \htycon{Bool}, \htycon{String}, \htycon{Maybe}
@@ -542,18 +542,18 @@
 \begin{frame}[fragile]{Types with Recursion}
   Natural number:
   \begin{lstlisting}[style=hask]
-    data Nat = Z | S Nat
+    data @tcNat@ = @vcZ@ | @vcS@ @tyNat@
 
-    Z :: Nat
-    S :: Nat -> Nat
+    @vcZ@ :: @tcNat@
+    @vcS@ :: @tcNat@ -> @tcNat@
   \end{lstlisting}
 
   \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum Nat {
-      Z,
-      S(Nat n)
+    enum @tyNat@ {
+      @vcZ@,
+      @vcS@(@tyNat@ n)
     }
   \end{lstlisting}
 \end{frame}
@@ -561,15 +561,15 @@
 \begin{frame}[fragile]{Types with Recursion}
   Natural number:
   \begin{lstlisting}[style=hask]
-    data Nat = Z | S Nat
+    data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
 
-    Z :: Nat
-    S :: Nat -> Nat
+    @vcZ@ :: @tcNat@
+    @vcS@ :: @tcNat@ -> @tcNat@
 
-    0 @|$\sim$@ Z
-    1 @|$\sim$@ S Z
-    2 @|$\sim$@ S (S Z)
-    3 @|$\sim$@ S (S (S Z))
+    0 @|$\sim$@ @vcZ@
+    1 @|$\sim$@ @vcS@ @vcZ@
+    2 @|$\sim$@ @vcS@ (@vcS@ @vcZ@)
+    3 @|$\sim$@ @vcS@ (@vcS@ (@vcS@ @vcZ@))
   \end{lstlisting}
 \end{frame}
 
@@ -593,7 +593,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{Types with Recursion}
-  Actual built-in sugared version is something like:
+  Actual built-in sugar is something like:
   \begin{lstlisting}[style=hask]
        data List a = Nil | Cons a (List a)
     => data @tc[]@ a = @vc[]@ | @vc(:)@ a (@tc[]@ a)
@@ -649,19 +649,19 @@
 \begin{frame}[fragile]{Functions with Recursion}
   Use recursion for recursive types:
   \begin{lstlisting}[style=hask]
-    toInt :: Nat -> Int
-    toInt Z     = @vc0@
-    toInt (S n) = @vc1@ + toInt n
+    toInt :: @tcNat@ -> Int
+    toInt @vcZ@     = @vc0@
+    toInt (@vcS@ n) = @vc1@ + toInt n
   \end{lstlisting}
 
   \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
-    static Int toInt (Nat n) {
+    static Int toInt (@tcNat@ n) {
       switch n:
-        case Z:
+        case @vcZ@:
           return @vc0@;
-        case (S m):  -- n @|$\sim$@ (S m)
+        case (@vcS@ m):  -- n @|$\sim$@ (S m)
           return @vc1@ + toInt(m);
     }
   \end{lstlisting}
@@ -670,12 +670,12 @@
 \begin{frame}[fragile]{Type of Functions}
   Q: Actual type of functions?\\
   \pause
-  A: Build in magic, it's called the $function\ arrow$, something like:
+  A: Built-in magic, it's called the $function\ arrow$, something like:
   \begin{lstlisting}[style=hask]
     data (->) a b = implementation
 
     even  :: Int @tc->@ Bool
-    toInt :: Nat @tc->@ Int
+    toInt :: @tcNat@ @tc->@ Int
   \end{lstlisting}
 \end{frame}
 
@@ -869,32 +869,103 @@
   The name for this extension is formally \textit{second order} $\lambda$\textit{-calculus}, aka \textit{System F}, denoted by $\lambda2$,
 \end{frame}
 
-\begin{frame}[fragile]{Value and Type Dependency}
-  Rethinking function \textit{f :: a -> b}:\\
-  \qquad f maps \hvalcon{Values} of \htycon{Type} $a$ to \hvalcon{Values} of \htycon{Type} $b$\\
-  => \hvalcon{Values} of \htycon{Type} $b$ that we get depends on the \hvalcon{Value} of \htycon{Type} $a$ the function takes in\\
+\begin{frame}[fragile]{Value and Type Interdependency}
+  Re-thinking functions:
+  \begin{lstlisting}[style=hask]
+    data Bool = False | True
+    -- built-in magic: infinitely many value constructors
+    data Int = ... | @vc-1@ | @vc0@ | @vc1@ | @vc2@ | ... 
+
+    even :: Int -> Bool
+    even @vc0@ = True
+    even n = if rem n @vc2@ == @vc0@
+             then True
+             else False
+  \end{lstlisting}
+
+  \qquad f maps \hvalcon{numbers} to \hvalcon{True} and \hvalcon{False}.
+  \ \\
+  \pause
+  => \hvalcon{Values} on RHS depends on the \hvalcon{Values} on LHS
+  \ \\
+  \pause
   => \hvalcon{Values} depending on \hvalcon{Values}
+\end{frame}
+
+\begin{frame}[fragile]{Value and Type Interdependency}
+  Re-thinking parametrized data types:
+  \begin{lstlisting}[style=hask]
+    data Maybe a = Nothing | Just a
+
+    data List a = Nil | Cons a (List a)
+  \end{lstlisting}
+
+  \pause
+  \qquad \htycon{List} takes a \htycon{Type} and return \hvalcon{Value} constructors
+  \ \\
+  \pause
+  => \hvalcon{Values} on RHS depends on the \htycon{Type} on LHS
+  \ \\
+  \pause
+  => \hvalcon{Values} depending on \htycon{Types}
+  \ \\
+  \pause
+  => Parametric polymorphism of $\lambda2$ again
 
   \ \\
   \pause
-  \begin{lstlisting}[style=hask]
-    even   :: Int -> Bool
-    length :: [a] -> Int
-  \end{lstlisting}
+  \textit{\tiny{Are we seeing a pattern yet?}}
 \end{frame}
 
-\begin{frame}[fragile]{Value and Type Dependency}
+\begin{frame}[fragile]{Value and Type Interdependency}
   Then what about the other cases of dependencies?
   \pause
   \begin{itemize}
-    \item \hvalcon{Values} depending on \hvalcon{Values}: function
+    \item \hvalcon{Values} depending on \hvalcon{Values}: $\lambda$-calculus
     \pause
-    \item \hvalcon{Values} depending on \htycon{Types}: parametric polymorphism
+    \item \hvalcon{Values} depending on \htycon{Types}: $\lambda2$, \textit{System F}
     \pause
-    \item \htycon{Types} depending on \hvalcon{Types}: type operators
+    \item \htycon{Types} depending on \htycon{Types}: \pause$\lambda\underline\omega$\\
+      => Type-level programming via type operators
     \pause
-    \item \htycon{Types} depending on \hvalcon{Values}: dependent types
+    \item \htycon{Types} depending on \hvalcon{Values}: \pause$\lambda\Pi$\\
+      => Dependent types
   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Lambda Cube}
+  \includegraphics[scale=0.6]{Lambda_cube.png}
+\end{frame}
+
+\begin{frame}[fragile]{System $F_c$}
+  Currently, Haskell as of GHC 7.10.2 doesnot have true type operators.  Achieves type-level programming through \textit{type families} and equalities on \htycon{Types}.  This axis of extension on $\lambda2$ is termed \text{System} $F_c$.
+  \ \\
+  \pause
+  This, plus a \hkind{Kind} system, a handful of \textit{language extensions}, we are ready fake dependent types in Haskell.
+\end{frame}
+
+\begin{frame}[fragile]{Teaser}
+  Example please:
+  \begin{lstlisting}[style=hask]
+    data Vec (n :: @dkNat@) a where
+      VNil :: Vec @tc0@ a
+      (@vc<:@) :: a -> Vec n a -> Vec (n @tf+@ @tc1@) a
+
+    vs :: Vec @tc6@ Int
+    vs = 4 @vc<:@ 8 @vc<:@ 15 @vc<:@ 16 @vc<:@ 23 @vc<:@ 42 @vc<:@ VNil
+  \end{lstlisting}
+
+  \pause
+  Translation$^*$ please:
+  \begin{lstlisting}[style=hask]
+    enum Vec<@dkNat@ n, A> {
+      Vec<@tc0@, n> VNil,
+      Vec<n @tf+@ @tc1@, n> VCons(A a, Vec<n, A> va)
+    }
+
+    Vec<@tc6@, Int> vs = VCons(4, VCons(8, VCons(15, VCons(16, VCons(23, VCons(42, VNil))))));
+  \end{lstlisting}
+  \textit{\tiny{(*) supreme looseness and totally made-up syntax}}
 \end{frame}
 
 
