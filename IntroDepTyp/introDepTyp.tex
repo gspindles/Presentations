@@ -102,7 +102,7 @@
   emph=
   {[3]
     Char,String,Bool,Int,Integer,Double,Float,Ordering,Maybe,Either,IO,
-    List, Vec
+    List, Vec, Func
   },
   emphstyle={[3]\color{MidnightBlue}\textbf},
   emph=
@@ -435,8 +435,8 @@
   Actual built-in sugar:
   \begin{lstlisting}[style=hask]
        data @tcTuple@ a b = @vcTuple@ a b
-    => data @tc(,)@ a b = @vc(,)@ a b
-    => data @tc(@a@tc,@ b@tc)@ = @vc(@a@vc,@ b@vc)@
+    => data (@tc,@) a b = (@vc,@) a b
+    => data (a@tc,@ b@tc)@ = (a@vc,@ b)
   \end{lstlisting}
 
   \pause
@@ -444,10 +444,10 @@
   \begin{lstlisting}[style=hask]
     type @tcEmployed@ = Bool
 
-    barbara, chet, luffy :: @tc(@@tcPerson@@tc,@ @tcEmployed@@tc)@
-    barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@ True@vc)@
-    chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ False@vc)@
-    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@ False@vc)@
+    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEmployed@)
+    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ True)
+    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ False)
+    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ False)
   \end{lstlisting}
 \end{frame}
 
@@ -485,10 +485,10 @@
   \begin{lstlisting}[style=hask]
     type @tcOccupation@ = Maybe String
 
-    barbara, chet, luffy :: @tc(@@tcPerson@@tc,@ @tcOccupation@@tc)@
-    barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@ Just "dancer"@vc)@
-    chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing@vc)@
-    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@ Just "pirate"@vc)@
+    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcOccupation@)
+    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ Just "dancer")
+    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing)
+    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ Just "pirate")
   \end{lstlisting}
 \end{frame}
 
@@ -526,13 +526,13 @@
   \begin{lstlisting}[style=hask]
     type @tcEarning@ = Either String Int
 
-    barbara, chet, luffy :: @tc(@@tcPerson@@tc,@ @tcEarning@@tc)@
-    barbara = @vc(@@vcPerson@ "Barbara" "Sakura" @vc30,@
-              Right @vc100000@@vc)@
-    chet    = @vc(@@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
-              Left "Is a baby"@vc)@ 
-    luffy   = @vc(@@vcPerson@ "Luff D." "Monkey" @vc19,@
-              Right @vc2000000@@vc)@
+    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEarning@)
+    barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@
+              Right @vc100000@)
+    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
+              Left "Is a baby") 
+    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@
+              Right @vc2000000@)
   \end{lstlisting}
 \end{frame}
 
@@ -563,10 +563,10 @@
     @vcZ@ :: @tcNat@
     @vcS@ :: @tcNat@ -> @tcNat@
 
-    0 @|$\sim$@ @vcZ@
-    1 @|$\sim$@ @vcS@ @vcZ@
-    2 @|$\sim$@ @vcS@ (@vcS@ @vcZ@)
-    3 @|$\sim$@ @vcS@ (@vcS@ (@vcS@ @vcZ@))
+    @vc0@ @|$\sim$@ @vcZ@
+    @vc1@ @|$\sim$@ @vcS@ @vcZ@
+    @vc2@ @|$\sim$@ @vcS@ (@vcS@ @vcZ@)
+    @vc3@ @|$\sim$@ @vcS@ (@vcS@ (@vcS@ @vcZ@))
   \end{lstlisting}
 \end{frame}
 
@@ -664,23 +664,47 @@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Type of Functions}
-  Q: Actual type of functions?\\
-  \pause
-  A: Built-in magic, it's called the $function\ arrow$, something like:
+\begin{frame}[fragile]{Functions with Recursion}
+  Use recursion for recursive types:
   \begin{lstlisting}[style=hask]
-    data (->) a b = implementation
+    toInt :: @tcNat@ -> Int
+    toInt @vcZ@     = @vc0@
+    toInt (@vcS@ n) = @vc1@ + toInt n
+  \end{lstlisting}
 
-    even  :: Int @tc->@ Bool
-    toInt :: @tcNat@ @tc->@ Int
+  Evaluation is a series of substitutions:
+  \begin{lstlisting}[style=hask]
+    three = @|$\sim$@ @vcS@ (@vcS@ (@vcS@ @vcZ@)) :: @tcNat@
+
+       toInt three :: @tc[@Int@tc]@
+    =  toInt (@vcS@ (@vcS@ (@vcS@ @vcZ@)))
+    = @vc1@ + toInt (@vcS@ (@vcS@ @vcZ@))
+    = @vc1@ + @vc1@ + toInt (@vcS@ @vcZ@)
+    = @vc1@ + @vc1@ + @vc1@ + toInt @vcZ@
+    = @vc1@ + @vc1@ + @vc1@ + @vc0@
+    = @vc1@ + @vc1@ + @vc1@
+    = @vc1@ + @vc2@
+    = @vc3@
   \end{lstlisting}
 \end{frame}
+
+%\begin{frame}[fragile]{Type of Functions}
+%  Q: Actual type of functions?\\
+%  \pause
+%  A: Built-in magic, it's called the $function\ arrow$, something like:
+%  \begin{lstlisting}[style=hask]
+%    data (->) a b = implementation
+%
+%    even  :: Int @tc->@ Bool
+%    toInt :: @tcNat@ @tc->@ Int
+%  \end{lstlisting}
+%\end{frame}
 
 \begin{frame}[fragile]{Functions with Parametric Polymorphism}
   Functions can be parametric:
   \begin{lstlisting}[style=hask]
     id :: a -> a
-    id a = a
+    id x = x
   \end{lstlisting}
 
   \pause
@@ -711,6 +735,29 @@
           List<A> rest = append(xs, l2);
           return Cons(x, rest);
     }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Functions with Parametric Polymorphism}
+  Functions can be parametric:
+  \begin{lstlisting}[style=hask]
+    append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
+    append @vc[]@     ys = ys
+    append (x@vc:@xs) ys = x @vc:@ append xs ys
+  \end{lstlisting}
+
+  Evaluation is a series of substitutions:
+  \begin{lstlisting}[style=hask]
+    xs = @vc[@@vc4@, @vc8@@vc]@ = @vc4@ @vc:@ @vc8@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
+    ys = @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@ = @vc15@ @vc:@ @vc16@ @vc:@ @vc23@ @vc:@ @vc42@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
+
+      append xs ys :: @tc[@Int@tc]@
+    = append @vc[4, 8]@ @vc[15, 16, 23, 42]@
+    = @vc4@ @vc:@ append @vc[8]@ @vc[15, 16, 23, 42]@
+    = @vc4@ @vc:@ @vc8@ @vc:@ append @vc[]@ @vc[15, 16, 23, 42]@
+    = @vc4@ @vc:@ @vc8@ @vc:@ @vc[15, 16, 23, 42]@
+    = @vc4@ @vc:@ @vc[8, 15, 16, 23, 42]@
+    = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
   \end{lstlisting}
 \end{frame}
 
@@ -763,12 +810,39 @@
 \end{frame}
 
 \begin{frame}[fragile]{More Functions Examples}
+  $map$:
+  \begin{lstlisting}[style=hask]
+    map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
+    map f @vc[]@     = @vc[]@
+    map f (x@vc:@xs) = f x @vc:@ map f xs
+  \end{lstlisting}
+
+  Evaluation is a series of substitutions:
+  \begin{lstlisting}[style=hask]
+  xs = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@ :: @tc[@Int@tc]@
+  even :: Int -> Bool
+
+    map even xs :: @tc[@Bool@tc]@
+  = map even @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
+  = even @vc4@ @vc:@ map even @vc[@@vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
+  = True @vc:@ even @vc8@ @vc:@ map even @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+  = True @vc:@ True @vc:@ even @vc15@ @vc:@ map even @vc[@@vc16@, @vc23@, @vc42@@vc]@
+  = True @vc:@ True @vc:@ False @vc:@ even @vc16@ @vc:@ map even @vc[@@vc23@, @vc42@@vc]@
+  = True @vc:@ True @vc:@ False @vc:@ True @vc:@ even @vc23@ @vc:@ map even @vc[@@vc42@@vc]@
+  = True @vc:@ True @vc:@ False @vc:@ True @vc:@ False @vc:@ even @vc24@ @vc:@ map even @vc[]@
+  = True @vc:@ True @vc:@ False @vc:@ True @vc:@ False @vc:@ True @vc:@ @vc[]@
+  = @vc[@True, True, False, True, False, True@vc]@
+
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{More Functions Examples}
   $zip$:
   \begin{lstlisting}[style=hask]
-    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[(@a@tc,@b@tc)]@
+    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[@(a@tc,@b)@tc]@
     zip @vc[]@     ys     = @vc[]@
     zip xs     @vc[]@     = @vc[]@
-    zip (x@vc:@xs) (y@vc:@ys) = @vc(@x@vc,@y@vc)@ @vc:@ zip xs ys
+    zip (x@vc:@xs) (y@vc:@ys) = (x@vc,@y) @vc:@ zip xs ys
   \end{lstlisting}
 
   \pause
@@ -790,6 +864,28 @@
   \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]{More Functions Examples}
+  $zip$:
+  \begin{lstlisting}[style=hask]
+    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[@(a@tc,@b)@tc]@
+    zip @vc[]@     ys     = @vc[]@
+    zip xs     @vc[]@     = @vc[]@
+    zip (x@vc:@xs) (y@vc:@ys) = (x@vc,@y) @vc:@ zip xs ys
+  \end{lstlisting}
+
+  Evaluation is a series of substitutions:
+  \begin{lstlisting}[style=hask]
+    xs = @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ :: @tc[@Char@tc]@
+    xs = @vc[@@vc1@, @vc2@, @vc3@, 4@vc]@ :: @tc[@Int@tc]@
+
+      zip xs ys :: @tc[@(Char@tc,@ Int)@tc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ zip @vc[@@str'b'@, @str'c'@@vc]@ @vc[@@vc2@, @vc3@, @vc4@@vc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ zip @vc[@@str'c'@@vc]@ @vc[@@vc3@, @vc4@@vc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ (@str'c'@@vc,@ @vc3@) @vc:@ zip @vc[]@ @vc[@@vc4@@vc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ (@str'c'@@vc,@ @vc3@) @vc:@ @vc[]@
+    = @vc[@(@str'a'@@vc,@ @vc1@), (@str'b'@@vc,@ @vc2@), (@str'c'@@vc,@ @vc3@)@vc]@
+  \end{lstlisting}
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Type Theory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -836,7 +932,7 @@
 
   \ \\
   \pause
-  The name for this extension of $\lambda$-calculus is called \textit{subtype polymorphism} and is denoted by $\lambda_{<:}$.\\
+  The is an extension on $\lambda$-calculus with \textit{subtype polymorphism} and is denoted by $\lambda_{<:}$.\\
   \pause
   => Object Oriented Programming.
   
@@ -854,10 +950,11 @@
   \pause
   Recall:
   \begin{lstlisting}[style=hask]
-    data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @vc[@a@vc]@
+    data Maybe a = Nothing | Just a
+    data List a = Nil | Cons a List a
 
     id :: a -> a
-    map :: (a -> b) -> @vc[@a@vc]@ -> @vc[@b@vc]@
+    map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
   \end{lstlisting}
 
   \pause
@@ -892,7 +989,7 @@
   \end{lstlisting}
 
   \pause
-  \qquad \htycon{List} takes a \htycon{Type} and return \hvalcon{Value} constructors
+  \qquad \htycon{Maybe} and \htycon{List} take a \htycon{Type} and return \hvalcon{Value} constructors
   \ \\
   \pause
   => \hvalcon{Values} on RHS depends on the \htycon{Type} on LHS
@@ -928,22 +1025,12 @@
   \includegraphics[scale=0.6]{Lambda_cube.png}
 \end{frame}
 
-\begin{frame}[fragile]{Pi and Sigma Types}
-  $\Pi$-type - quantification of values on type level
-  \begin{lstlisting}[style=hask]
-  \end{lstlisting}
-
-  \pause
-  $\Sigma$-type - dependent pair
-  \begin{lstlisting}[style=hask]
-  \end{lstlisting}
-\end{frame}
-
 \begin{frame}[fragile]{System $F_c$}
-  Currently, Haskell as of GHC 7.10.2 doesnot have true type operators.  Achieves type-level programming through \textit{type families} and equalities on \htycon{Types}.  This axis of extension on $\lambda2$ is termed \text{System} $F_c$.
+  Currently, Haskell as of GHC 7.10.2 doesnot have true type operators. Achieves type-level programming through \textit{type families} and equality on \htycon{Types}. This axis of extension on $\lambda2$ is termed \text{System} $F_c$.
+
   \ \\
   \pause
-  This, plus a \hkind{Kind} system, and a handful of \textit{language extensions}, we are ready fake dependent types in Haskell.
+   Haskell is not truely dependent either because of the strong distinction between \hvalcon{Values} and \htycon{Types}. But with a handful of \textit{language extensions} and the current \hkind{Kind} system, we are ready to fake dependent types in Haskell.
 \end{frame}
 
 \begin{frame}[fragile]{Teaser}
@@ -991,6 +1078,7 @@
     data Bool = False | True
     data @tc[@a@tc]@ = Nil | (@vc:@) a @vc[@a@vc]@
     data Maybe a = Nothing | Just a
+    data (a@tc,@ b) = (a@vc,@ b)
     data Either a b = Left a | Right b
 
     @|\pause@
@@ -1000,6 +1088,23 @@
     @tc[]@ :: @|\pause@@dk*@ -> @dk*@@|\pause@
     Maybe @tcPerson@ :: @|\pause@@dk*@@|\pause@
     Maybe :: @|\pause@@dk*@ -> @dk*@@|\pause@
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Introducing $\star$}
+  \begin{lstlisting}[style=hask]
+    -- built-in magic: infinitely many value constructors
+    data Int = @|\ldots@ | @vc-1@ | @vc0@ | @vc1@ | @vc2@ | @|\ldots@
+    data Bool = False | True
+    data @tc[@a@tc]@ = Nil | (@vc:@) a @vc[@a@vc]@
+    data Maybe a = Nothing | Just a
+    data (a@tc,@ b) = (a@vc,@ b)
+    data Either a b = Left a | Right b
+
+    @|\pause@
+    (@tcPerson@@tc,@ Bool) :: @|\pause@@dk*@@|\pause@
+    (@tc,@) @tcPerson@ :: @|\pause@@dk*@ -> @dk*@@|\pause@
+    (@tc,@) :: @|\pause@@dk*@ -> @dk*@ -> @dk*@@|\pause@
     Either String @tcEarning@ :: @|\pause@@dk*@@|\pause@
     Either String :: @|\pause@@dk*@ -> @dk*@@|\pause@
     Either :: @|\pause@@dk*@ -> @dk*@ -> @dk*@
@@ -1007,7 +1112,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{Introducing Constraint}
-  Haskell has $typeclasses$ that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this typeclass instance can be used to provide context for functions.
+  Haskell has $typeclasses$ that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this \hclass{Typeclass} instance can be used to provide \textit{contexts} for functions.
   \pause
   \begin{lstlisting}[style=hask]
     Show -- types that can be serialized to String@|\pause@
@@ -1037,7 +1142,7 @@
 
     String show<A>(A a) where A : Show
     Bool equals<A>(A a, A a) where A : Eq
-    Ordering compare<A>(A a, A a) where A : Ordering
+    Ordering compare<A>(A a, A a) where A : Ord
     A plus<A>(A a, A a) where A : Num
     F<T<_>> sequenceA<F,T>(T<F<_>> tfa) where F : Applicative, T : Traversable
   \end{lstlisting}
@@ -1046,9 +1151,14 @@
 \begin{frame}[fragile]{Introducing Constraint}
   These \hclass{Typeclass} contexts have \hkind{Kind} \hkind{Constraint}.
   \begin{lstlisting}[style=hask]
-    {-# LANGUAGE ConstraintKinds #-}
+    Show :: @dk*@ -> Constraint
+    Eq   :: @dk*@ -> Constraint
+    Ord  :: @dk*@ -> Constraint
+    Num  :: @dk*@ -> Constraint
 
-    type @ccShowCxt@ a b = (Show a, Show b)
+    @|\pause@
+    {-# LANGUAGE ConstraintKinds #-}
+    type @ccShowCxt@ a b = (Show a@tc,@ Show b)
 
     sameSerialization :: @ccShowContxt@ a b => a -> b -> Bool
     sameSerialization a b = show a == show b
@@ -1098,6 +1208,27 @@
 \end{frame}
 
 \begin{frame}[fragile]{GADTs}
+  Define data and explicit give type signatures to the \hvalcon{Value} constructors
+  \begin{lstlisting}[style=hask]
+    data Bool = False | True
+    data Maybe a = Nothing | Just a
+    data List a = Nil | Cons a (List a)
+  \end{lstlisting}
+
+  Becomes:
+  \begin{lstlisting}[style=hask]
+    data Bool where
+      False :: Bool
+      True  :: Bool
+
+    data Maybe a where
+      Nothing :: Maybe a
+      Just    :: a -> Maybe a
+
+    data List a where
+      Nil  :: List a
+      Cons :: a -> List a -> List a
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{KindSignatures}
