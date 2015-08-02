@@ -50,7 +50,7 @@
     ]
   \end{frame}
 }
-\newcommand{\hkeyword}[1]{\textcolor{TealBlue}{\textsc{#1}}}
+\newcommand{\hkeyword}[1]{\textcolor{Aquamarine}{\textsc{#1}}}
 \newcommand{\hfunction}[1]{\textcolor{Green}{\textsc{#1}}}
 \newcommand{\htycon}[1]{\textcolor{MidnightBlue}{\textsc{#1}}}
 \newcommand{\hvalcon}[1]{\textcolor{Red}{\textsc{#1}}}
@@ -73,7 +73,7 @@
   showspaces=false,
   breaklines=true,
   showtabs=false,
-  moredelim=**[is][\color{TealBlue}]{@kw}{@},
+  moredelim=**[is][\color{Aquamarine}]{@kw}{@},
   moredelim=**[is][\color{Green}]{@f}{@},
   moredelim=**[is][\color{MidnightBlue}]{@tc}{@},
   moredelim=**[is][\color{Red}]{@vc}{@},
@@ -91,7 +91,7 @@
     where,let,in,case,of,if,then,else,do,rec,proc,forall,pi,
     type,newtype,data,family,kind,class,instance,deriving,default
   },
-  emphstyle={[1]\color{TealBlue}\textbf},
+  emphstyle={[1]\color{Aquamarine}\textbf},
   % functions
   emph=
   {[2]
@@ -136,7 +136,7 @@
   {[8]
     enum, interface, new, static, switch, return
   },
-  emphstyle={[8]\color{TealBlue}\textbf},
+  emphstyle={[8]\color{Aquamarine}\textbf},
 }
 
 \begin{document}
@@ -174,11 +174,11 @@
 \end{frame}
 
 \begin{frame}{A Joke}
-  This is not a \texttt{m-} tutorial.
+  This is not a \texttt{m-} tutorial.\\
   \pause
   Nor is it a \texttt{lens} tutorial
   \pause
-  (aka the new new \texttt{m-} tutorial\ldots
+  (aka the new new \texttt{m-} tutorial\ldots\\
   \pause
   \ldots because \texttt{arrows} \textit{were} the new \texttt{m-} tutorials).
 \end{frame}
@@ -447,7 +447,7 @@
     barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEmployed@)
     barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ True)
     chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ False)
-    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ False)
+    luffy   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@ False)
   \end{lstlisting}
 \end{frame}
 
@@ -488,7 +488,7 @@
     barbara, chet, luffy :: (@tcPerson@@tc,@ @tcOccupation@)
     barbara = (@vcPerson@ "Barbara" "Sakura" @vc30,@ Just "dancer")
     chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing)
-    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@ Just "pirate")
+    luffy   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@ Just "pirate")
   \end{lstlisting}
 \end{frame}
 
@@ -531,7 +531,7 @@
               Right @vc100000@)
     chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
               Left "Is a baby") 
-    luffy   = (@vcPerson@ "Luff D." "Monkey" @vc19,@
+    luffy   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@
               Right @vc2000000@)
   \end{lstlisting}
 \end{frame}
@@ -876,9 +876,10 @@
   Evaluation is a series of substitutions:
   \begin{lstlisting}[style=hask]
     xs = @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ :: @tc[@Char@tc]@
-    xs = @vc[@@vc1@, @vc2@, @vc3@, 4@vc]@ :: @tc[@Int@tc]@
+    ys = @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@ :: @tc[@Int@tc]@
 
       zip xs ys :: @tc[@(Char@tc,@ Int)@tc]@
+    = zip @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ zip @vc[@@str'b'@, @str'c'@@vc]@ @vc[@@vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ zip @vc[@@str'c'@@vc]@ @vc[@@vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ (@str'c'@@vc,@ @vc3@) @vc:@ zip @vc[]@ @vc[@@vc4@@vc]@
@@ -899,6 +900,7 @@
   \pause
   \begin{itemize}
     \item function application
+    \pause
     \item function abstraction {\tiny(aka higher-order functions)}
     \pause
     \item variable binding
@@ -928,11 +930,11 @@
 \subsection{Extensions on $\lambda$-calculus}
 
 \begin{frame}[fragile]{Subtype Polymorphism}
-  Given data types \htycon{$T$} and \htycon{$P$}, if there is a relation between \htycon{$T$} and \htycon{$P$} by some notion of substitutability with \htycon{$T$} in place of \htycon{$P$}, then we say \htycon{$T$} is a \textit{subtype} of the \textit{supertype} \htycon{$P$}, denoted by \htycon{$T$} $<:$ \htycon{$P$}.
+  Given data types \htycon{$T$} and \htycon{$P$}, if there is a relation between \htycon{$T$} and \htycon{$P$} by some notion of substitutability with \htycon{$T$} in place of \htycon{$P$}, then we say \htycon{$T$} is a \texttt{subtype} of the \texttt{supertype} \htycon{$P$}, denoted by \htycon{$T$} $<:$ \htycon{$P$}.
 
   \ \\
   \pause
-  The is an extension on $\lambda$-calculus with \textit{subtype polymorphism} and is denoted by $\lambda_{<:}$.\\
+  The is an extension on $\lambda$-calculus with \texttt{subtype polymorphism} and is denoted by $\lambda_{<:}$.\\
   \pause
   => Object Oriented Programming.
   
@@ -942,7 +944,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{Parametric Polymorphism}
-  Introduce a mechanism of universal quantification over \htycon{Types}: \htycon{Types} can abstract over \htycon{Types}, allows for \textit{generic data types} and \textit{generic functions}.\\
+  Introduce a mechanism of universal quantification over \htycon{Types}: \htycon{Types} can abstract over \htycon{Types}, allows for \texttt{generic data types} and \texttt{generic functions}.\\
   \pause
   => Generic Programming.
 
@@ -958,7 +960,7 @@
   \end{lstlisting}
 
   \pause
-  The name for this extension is formally \textit{second order} $\lambda$\textit{-calculus}, aka \textit{System F}, denoted by $\lambda2$,
+  The name for this extension is formally \texttt{second order} $\lambda$\texttt{-calculus}, aka \texttt{System F}, denoted by $\lambda2$,
 \end{frame}
 
 \begin{frame}[fragile]{Value and Type Interdependency}
@@ -1011,7 +1013,7 @@
   \begin{itemize}
     \item \hvalcon{Values} depending on \hvalcon{Values}: $\lambda$-calculus
     \pause
-    \item \hvalcon{Values} depending on \htycon{Types}: $\lambda2$, \textit{System F}
+    \item \hvalcon{Values} depending on \htycon{Types}: $\lambda2$, \texttt{System F}
     \pause
     \item \htycon{Types} depending on \htycon{Types}: \pause$\lambda\underline\omega$\\
       => Type-level programming via type operators
@@ -1026,11 +1028,11 @@
 \end{frame}
 
 \begin{frame}[fragile]{System $F_c$}
-  Currently, Haskell as of GHC 7.10.2 doesnot have true type operators. Achieves type-level programming through \textit{type families} and equality on \htycon{Types}. This axis of extension on $\lambda2$ is termed \text{System} $F_c$.
+  Currently, Haskell as of GHC 7.10.2 doesnot have true type operators. Achieves type-level programming through \texttt{type families} and equality on \htycon{Types}. This axis of extension on $\lambda2$ is termed \text{System} $F_c$.
 
   \ \\
   \pause
-   Haskell is not truely dependent either because of the strong distinction between \hvalcon{Values} and \htycon{Types}. But with a handful of \textit{language extensions} and the current \hkind{Kind} system, we are ready to fake dependent types in Haskell.
+   Haskell is not truely dependent either because of the strong distinction between \hvalcon{Values} and \htycon{Types}. But with a handful of \texttt{language extensions} and the current \hkind{Kind} system, we are ready to fake dependent types in Haskell.
 \end{frame}
 
 \begin{frame}[fragile]{Teaser}
@@ -1112,7 +1114,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{Introducing Constraint}
-  Haskell has $typeclasses$ that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this \hclass{Typeclass} instance can be used to provide \textit{contexts} for functions.
+  Haskell has $typeclasses$ that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this \hclass{Typeclass} instance can be used to provide \texttt{contexts} for functions.
   \pause
   \begin{lstlisting}[style=hask]
     Show -- types that can be serialized to String@|\pause@
@@ -1208,7 +1210,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{GADTs}
-  Define data and explicit give type signatures to the \hvalcon{Value} constructors
+  Define data and explicit give type signatures to the \hvalcon{Value} constructors.
   \begin{lstlisting}[style=hask]
     data Bool = False | True
     data Maybe a = Nothing | Just a
