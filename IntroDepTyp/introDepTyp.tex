@@ -88,7 +88,7 @@
   {[1]
     % as didn't make it due to a:as
     module,import,qualified,hiding,foreign,infix,infixr,infixl,
-    where,let,in,case,of,if,then,else,do,rec,proc,forall,pi,
+    where,let,in,case,of,if,then,else,do,rec,proc,forall,pi,with,
     type,newtype,data,family,kind,class,instance,deriving,default
   },
   emphstyle={[1]\color{Aquamarine}\textbf},
@@ -1070,6 +1070,7 @@
 
 \begin{frame}[fragile]{Kinds}
   Q: \htycon{Types} classify \hvalcon{Values}, but what classifies \htycon{Types}?\\
+  \pause
   A: \hkind{Kinds}
 \end{frame}
 
@@ -1103,7 +1104,6 @@
     data (a@tc,@ b) = (a@vc,@ b)
     data Either a b = Left a | Right b
 
-    @|\pause@
     (@tcPerson@@tc,@ Bool) :: @|\pause@@dk*@@|\pause@
     (@tc,@) @tcPerson@ :: @|\pause@@dk*@ -> @dk*@@|\pause@
     (@tc,@) :: @|\pause@@dk*@ -> @dk*@ -> @dk*@@|\pause@
@@ -1165,7 +1165,7 @@
     sameSerialization :: @ccShowContxt@ a b => a -> b -> Bool
     sameSerialization a b = show a == show b
 
-    @ccShowCxt@ :: @dk*@ -> @dk*@ -> Constraint
+    @ccShowCxt@ :: @|\pause@@dk*@ -> @dk*@ -> Constraint
   \end{lstlisting}
 \end{frame}
 
@@ -1217,8 +1217,10 @@
     data List a = Nil | Cons a (List a)
   \end{lstlisting}
 
+  \pause
   Becomes:
   \begin{lstlisting}[style=hask]
+    {-# LANGUAGE GADTs #-}
     data Bool where
       False :: Bool
       True  :: Bool
@@ -1233,23 +1235,208 @@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{KindSignatures}
+\begin{frame}[fragile]{GADTs}
+  Define data and explicit give type signatures to the \hvalcon{Value} constructors.
+  \begin{lstlisting}[style=hask]
+    data Bool = False | True
+    data Maybe a = Nothing | Just a
+    data List a = Nil | Cons a (List a)
+  \end{lstlisting}
+
+  Loose translations:
+  \begin{lstlisting}[style=hask]
+    enum Bool {
+      Bool False,
+      Bool True
+    }
+
+    emum Maybe<A> {
+      Maybe<A> Nothing,
+      Maybe<A> Just(A a)
+    }
+
+    enum List<A> {
+      List<A> Nil,
+      List<A> Cons(A a, List<A> as)
+    }
+  \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Type Operators}
+\begin{frame}[fragile]{KindSignatures}
+  Specify the \hkind{Kind} of the \htycon{Type} variables:
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE GADTs #-}
+    {-# LANGUAGE KindSignatures #-}
+    data Bool :: @dk*@ where
+      False :: Bool
+      True  :: Bool
+
+    data Maybe :: @dk*@ -> @dk*@ where
+      Nothing :: Maybe a
+      Just    :: a -> Maybe a
+
+    data List :: @dk*@ -> @dk*@ where
+      Nil  :: List a
+      Cons :: a -> List a -> List a
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{DataKinds}
+  \hkind{Kinds} are built-in; no user defined \hkind{Kinds}.
+
+  \ \\
+  \pause
+  Want \hvalcon{Values} at the \htycon{Type} level though!
+
+  \ \\
+  \pause
+  => Data kind promotion :)
+\end{frame}
+
+\begin{frame}[fragile]{DataKinds}
+  Example:
+  \begin{lstlisting}[style=hask]
+    data Bool = False | True
+  \end{lstlisting}
+
+  With DataKinds, we get something like:
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE DataKinds #-}
+  \end{lstlisting}
+  \begin{tabular}{l || c | c}
+    \hkind{Kind} & \ & \hkind{Bool} \\
+    \hline \htycon{Type} & \htycon{Bool} & \htycon{'}\hvalcon{True} | \htycon{'}\hvalcon{False} \\
+    \hline \hvalcon{Value} & \hvalcon{True} | \hvalcon{False} & \ \\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]{DataKinds}
+  Example:
+  \begin{lstlisting}[style=hask]
+    data Nat = Z | S Nat
+  \end{lstlisting}
+
+  With DataKinds, we get something like:
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE DataKinds #-}
+  \end{lstlisting}
+  \begin{tabular}{l || c | c}
+    \hkind{Kind} & \ & \hkind{Nat} \\
+    \hline \htycon{Type} & \htycon{Nat} & \htycon{'}\hvalcon{Z} | \htycon{'}\hvalcon{S} \hkind{Nat} \\
+    \hline \hvalcon{Value} & \hvalcon{Z} | \hvalcon{S} \htycon{Nat} & \ \\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+  Example with GADTs:
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE DataKinds #-}
+    {-# LANGUAGE GADTs #-}
+    data Bool = False | True
+
+    data @tcTextInput@ a where
+      @vcRawText@  :: String -> @tcTextInput@ @tc'False@
+      @vcSafeText@ :: String -> @tcTextInput@ @tc'True@
+
+    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'True@
+    sanitize (@vcRawText@ str)  = @vcSafeText@ (htmlEncode str)
+    sanitize (@vcSafeText@ str) = @vcSafeText@ str
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE DataKinds #-}
+    {-# LANGUAGE GADTs #-}
+    data Bool = False | True
+
+    data @tcTextInput@ a where
+      @vcRawText@  :: String -> @tcTextInput@ @tc'False@
+      @vcSafeText@ :: String -> @tcTextInput@ @tc'True@
+
+    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'True@
+    sanitize (@vcRawText@ str)  = @vcSafeText@ (htmlEncode str)
+    sanitize x              = x
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+  Translation$^*$:
+  \begin{lstlisting}[style=hask]
+    enum Bool {
+      Bool False,
+      Bool True
+    }
+
+    enum @tcTextInput@<@dkBool@ A> {
+      @tcTextInput@<@tc'False@> @vcRawText@(String str),
+      @tcTextInput@<@tc'True@> @vcSafeText@(String str)
+    }
+
+    @tcTextInput@<@tc'True@> sanitize(@tcTextInput@<A> input) {
+      switch input:
+        case @vcRawText@(str):
+          return @vcSafeText@(htmlEncode(str));
+        default:
+          return input;
+    }
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Type Families}
 \end{frame}
 
+\begin{frame}[fragile]{Type Operators}
+\end{frame}
+
+
+\begin{frame}[fragile]{Head of the List}
+  \texttt{head} returns the first element of the list:
+  \begin{lstlisting}[style=hask]
+    -- from standard library
+    head :: @tc[@a@tc]@ -> a
+    head @vc[]@     = error "empty list"
+    head (x@vc:@xs) = x
+  \end{lstlisting}
+
+  \texttt{Elm} updated to:
+  \begin{lstlisting}[style=hask]
+    head :: @tc[@a@tc]@ -> Maybe a
+    head @vc[]@     = Nothing
+    head (x@vc:@xs) = Just x
+  \end{lstlisting}
+
+  Alternatively:
+  \begin{lstlisting}[style=hask]
+    head :: @tc[@a@tc]@ -> Either String a
+    head @vc[]@     = Left "empty list"
+    head (x@vc:@xs) = Right x
+  \end{lstlisting}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Q & A
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Questions}
+\section{Closing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Beyond}
+
+\begin{frame}[fragile]{Beyond Dependent Types}
+  \begin{itemize}
+    \item Total functional languages
+      \begin{itemize}
+        \item termination and totality check
+        \item disallow partial functions
+        \item distinguish between \hkeyword{data} and \hkeyword{codata}
+      \end{itemize}
+    \item Proof assistant languages
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Questions}
 
 % q&a
 \begin{frame}
