@@ -51,12 +51,13 @@
   \end{frame}
 }
 \newcommand{\hkeyword}[1]{\textcolor{Aquamarine}{\textsc{#1}}}
-\newcommand{\hfunction}[1]{\textcolor{Green}{\textsc{#1}}}
+\newcommand{\hfunction}[1]{\textcolor{OliveGreen}{\textsc{#1}}}
 \newcommand{\htycon}[1]{\textcolor{MidnightBlue}{\textsc{#1}}}
 \newcommand{\hvalcon}[1]{\textcolor{Red}{\textsc{#1}}}
 \newcommand{\hkind}[1]{\textcolor{Fuchsia}{\textsc{#1}}}
+\newcommand{\hsort}[1]{\textcolor{Orange}{\textsc{#1}}}
 \newcommand{\hclass}[1]{\textcolor{Magenta}{\textsc{#1}}}
-\newcommand{\htyfam}[1]{\textcolor{OliveGreen}{\textsc{#1}}}
+\newcommand{\htyfam}[1]{\textcolor{Green}{\textsc{#1}}}
 \newcommand{\hcomment}[1]{\textcolor{Grey}{\textsc{#1}}}
 \newcommand{\hother}[1]{\textcolor{Black}{\textsc{#1}}}
 
@@ -74,12 +75,13 @@
   breaklines=true,
   showtabs=false,
   moredelim=**[is][\color{Aquamarine}]{@kw}{@},
-  moredelim=**[is][\color{Green}]{@f}{@},
+  moredelim=**[is][\color{OliveGreen}]{@f}{@},
   moredelim=**[is][\color{MidnightBlue}]{@tc}{@},
   moredelim=**[is][\color{Red}]{@vc}{@},
   moredelim=**[is][\color{Fuchsia}]{@dk}{@},
+  moredelim=**[is][\color{Orange}]{@st}{@},
   moredelim=**[is][\color{Magenta}]{@cc}{@},
-  moredelim=**[is][\color{OliveGreen}]{@tf}{@},
+  moredelim=**[is][\color{Green}]{@tf}{@},
   moredelim=**[is][\color{Maroon}]{@str}{@},
   moredelim=**[is][\color{Black}]{@o}{@},
   escapeinside={{@|}{@}},
@@ -97,19 +99,19 @@
   {[2]
     placeholder
   },
-  emphstyle={[2]\color{Green}},
+  emphstyle={[2]\color{OliveGreen}},
   % type constructors
   emph=
   {[3]
     Char,String,Bool,Int,Integer,Double,Float,Ordering,Maybe,Either,IO,
-    List, Vec, Func
+    List, Vect, Func, HList, HVect
   },
   emphstyle={[3]\color{MidnightBlue}\textbf},
   emph=
   % value constructors
   {[4]
     True,False,Nothing,Just,Left,Right,LT,EQ,GT,
-    Nil, Cons, VNil, VCons
+    Nil, Cons, VNil, VCons, HNil, HCons, HVNil, HVCons
   },
   emphstyle={[4]\color{Red}\textbf},
   % type classes, contexts, constraints
@@ -122,21 +124,27 @@
   % kinds
   emph=
   {[6]
-    Constraint,AnyK,OpenKind,BOX
+    Constraint,AnyK,OpenKind
   },
   emphstyle={[6]\color{Fuchsia}\textbf},
-  % type families
-  emph=
-  {[7]
-    Plus,Mult
-  },
-  emphstyle={[7]\color{OliveGreen}\textbf},
-  % foreign languages
+  % sort
   emph=
   {[8]
+    BOX
+  },
+  emphstyle={[8]\color{Orange}\textbf},
+  % type families
+  emph=
+  {[8]
+    Plus,Mult,Min
+  },
+  emphstyle={[8]\color{Green}\textbf},
+  % foreign languages
+  emph=
+  {[9]
     enum, interface, new, static, switch, return
   },
-  emphstyle={[8]\color{Aquamarine}\textbf},
+  emphstyle={[9]\color{Aquamarine}\textbf},
 }
 
 \begin{document}
@@ -185,7 +193,7 @@
 
 
 \begin{frame}{About This Talk}
-    \texttt{Agda}, \texttt{Idris}, \texttt{Coq} and co$^*$ have full support for dependent types.
+    \texttt{Agda}, \texttt{Idris}, \texttt{Coq} and co\textsuperscript{*} have full support for dependent types.
 
     \ \\
     \pause
@@ -571,7 +579,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{Types with Recursion}
-  List - recursive type while parametrize over another type:
+  \htycon{List} - recursive type while parametrize over another type:
   \begin{lstlisting}[style=hask]
     data List a = Nil | Cons a (List a)
 
@@ -598,7 +606,7 @@
   \end{lstlisting}
 
   \pause
-  De-sugar that list:
+  De-sugar that \htycon{List}:
   \begin{lstlisting}[style=hask]
     ints :: List Int 
     ints = Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))
@@ -887,6 +895,8 @@
     = @vc[@(@str'a'@@vc,@ @vc1@), (@str'b'@@vc,@ @vc2@), (@str'c'@@vc,@ @vc3@)@vc]@
   \end{lstlisting}
 \end{frame}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Type Theory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1027,34 +1037,34 @@
   \includegraphics[scale=0.6]{Lambda_cube.png}
 \end{frame}
 
-\begin{frame}[fragile]{System $F_c$}
-  Currently, Haskell as of GHC 7.10.2 doesnot have true type operators. Achieves type-level programming through \texttt{type families} and equality on \htycon{Types}. This axis of extension on $\lambda2$ is termed \text{System} $F_c$.
+\begin{frame}[fragile]{System F$_c$}
+  Currently, \texttt{Haskell} as of GHC 7.10.2 doesnot have true type operators. Achieves type-level programming through \texttt{type families} and equality on \htycon{Types}. This axis of extension on $\lambda2$ is termed \texttt{System F$_c$}.
 
   \ \\
   \pause
-   Haskell is not truely dependent either because of the strong distinction between \hvalcon{Values} and \htycon{Types}. But with a handful of \texttt{language extensions} and the current \hkind{Kind} system, we are ready to fake dependent types in Haskell.
+  \texttt{Haskell} is not truely dependent either because of the strong distinction between \hvalcon{Values} and \htycon{Types}. But with a handful of \texttt{language extensions} and the current \hkind{Kind} system, we are ready to fake dependent types in \texttt{Haskell}.
 \end{frame}
 
 \begin{frame}[fragile]{Teaser}
   Example please:
   \begin{lstlisting}[style=hask]
-    data Vec (n :: @dkNat@) a where
-      VNil :: Vec @tc0@ a
-      (@vc:>@) :: a -> Vec n a -> Vec (n @tf+@ @tc1@) a
+    data Vect (n :: @dkNat@) a where
+      VNil :: Vect @vc0@ a
+      (@vc:>@) :: a -> Vect n a -> Vect (n @tf+@ @vc1@) a
 
-    vs :: Vec @tc6@ Int
-    vs = 4 @vc:>@ 8 @vc:>@ 15 @vc:>@ 16 @vc:>@ 23 @vc:>@ 42 @vc:>@ VNil
+    vs :: Vect @vc6@ Int
+    vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
   \end{lstlisting}
 
   \pause
-  Translation$^*$ please:
+  Translation\textsuperscript{*} please:
   \begin{lstlisting}[style=hask]
-    enum Vec<@dkNat@ n, A> {
-      Vec<@tc0@, n> VNil,
-      Vec<n @tf+@ @tc1@, n> VCons(A a, Vec<n, A> va)
+    enum Vect<@dkNat@ n, A> {
+      Vect<@vc0@, A> VNil,
+      Vect<n @tf+@ @vc1@, A> VCons(A a, Vect<n, A> va)
     }
 
-    Vec<@tc6@, Int> vs = VCons(4, VCons(8, VCons(15, VCons(16, VCons(23, VCons(42, VNil))))));
+    Vect<@vc6@, Int> vs = VCons(@vc4@, VCons(@vc8@, VCons(@vc15@, VCons(@vc16@, VCons(@vc23@, VCons(@vc42@, VNil))))));
   \end{lstlisting}
   \textit{\tiny{(*) supreme looseness and totally made-up syntax}}
 \end{frame}
@@ -1114,7 +1124,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{Introducing Constraint}
-  Haskell has $typeclasses$ that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this \hclass{Typeclass} instance can be used to provide \texttt{contexts} for functions.
+  \texttt{Haskell} has $typeclasses$ that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this \hclass{Typeclass} instance can be used to provide \texttt{contexts} for functions.
   \pause
   \begin{lstlisting}[style=hask]
     Show -- types that can be serialized to String@|\pause@
@@ -1160,6 +1170,7 @@
 
     @|\pause@
     {-# LANGUAGE ConstraintKinds #-}
+
     type @ccShowCxt@ a b = (Show a@tc,@ Show b)
 
     sameSerialization :: @ccShowContxt@ a b => a -> b -> Bool
@@ -1181,8 +1192,8 @@
     AnyK        -- polymorphic kind for flexible arity
     @|\pause@
     -- the only sort, sorts classify kinds
-    (@dk*@), (@dk#@), Constraint, OpenKind, AnyK :: BOX
-    BOX :: BOX
+    (@dk*@), (@dk#@), Constraint, OpenKind, AnyK :: @stBOX@
+    @stBOX@ :: @stBOX@
   \end{lstlisting}
 
   All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2.
@@ -1332,13 +1343,15 @@
   \begin{lstlisting}[style=hask]
     {-# LANGUAGE DataKinds #-}
     {-# LANGUAGE GADTs #-}
+    {-# LANGUAGE KindSignatures #-}
+
     data Bool = False | True
 
     data @tcTextInput@ a where
-      @vcRawText@  :: String -> @tcTextInput@ @tc'False@
-      @vcSafeText@ :: String -> @tcTextInput@ @tc'True@
+      @vcRawText@  :: String -> @tcTextInput@ @tc'@False
+      @vcSafeText@ :: String -> @tcTextInput@ @tc'@True
 
-    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'True@
+    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'@True
     sanitize (@vcRawText@ str)  = @vcSafeText@ (htmlEncode str)
     sanitize (@vcSafeText@ str) = @vcSafeText@ str
   \end{lstlisting}
@@ -1348,32 +1361,34 @@
   \begin{lstlisting}[style=hask]
     {-# LANGUAGE DataKinds #-}
     {-# LANGUAGE GADTs #-}
+    {-# LANGUAGE KindSignatures #-}
+
     data Bool = False | True
 
-    data @tcTextInput@ a where
-      @vcRawText@  :: String -> @tcTextInput@ @tc'False@
-      @vcSafeText@ :: String -> @tcTextInput@ @tc'True@
+    data @tcTextInput@ (a :: Bool) where
+      @vcRawText@  :: String -> @tcTextInput@ @tc'@False
+      @vcSafeText@ :: String -> @tcTextInput@ @tc'@True
 
-    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'True@
+    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'@True
     sanitize (@vcRawText@ str)  = @vcSafeText@ (htmlEncode str)
     sanitize x              = x
   \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Example}
-  Translation$^*$:
+  Translation\textsuperscript{*}:
   \begin{lstlisting}[style=hask]
     enum Bool {
       Bool False,
       Bool True
     }
 
-    enum @tcTextInput@<@dkBool@ A> {
-      @tcTextInput@<@tc'False@> @vcRawText@(String str),
-      @tcTextInput@<@tc'True@> @vcSafeText@(String str)
+    enum @tcTextInput@<Bool b> {
+      @tcTextInput@<@tc'@False> @vcRawText@(String str),
+      @tcTextInput@<@tc'@True> @vcSafeText@(String str)
     }
 
-    @tcTextInput@<@tc'True@> sanitize(@tcTextInput@<A> input) {
+    @tcTextInput@<@tc'@True> sanitize(@tcTextInput@<A> input) {
       switch input:
         case @vcRawText@(str):
           return @vcSafeText@(htmlEncode(str));
@@ -1381,38 +1396,290 @@
           return input;
     }
   \end{lstlisting}
+  \textit{\tiny{(*) supreme looseness and totally made-up syntax}}
 \end{frame}
 
 \begin{frame}[fragile]{Type Families}
+  \texttt{Type families} = type level functions, computed and checked at compile time.
+
+  \ \\
+  \pause
+  Comes in 2 types:
+  \begin{itemize}
+    \item type synonym families
+    \item data families
+  \end{itemize}
+
+  \ \\
+  \pause
+  and in a few flavors:
+  \begin{itemize}
+    \item associated vs. unassociated
+    \item open vs. closed\textsuperscript{1}
+    \item injectivity\textsuperscript{2}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Type Families}
+  At \hvalcon{Value} level:
+  \begin{lstlisting}[style=hask]
+    data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
+
+    add :: @tcNat@ -> @tcNat@ -> @tcNat@
+    add @vcZ@     m = m
+    add (@vcS@ n) m = @vcS@ (add n m)
+
+       add (@vcS@ (@vcS@ @vcZ@)) (@vcS@ @vcZ@)
+    => @vcS@ (add (@vcS@ @vcZ@) (@vcS@ @vcZ@))
+    => @vcS@ (@vcS@ (add @vcZ@ (@vcS@ @vcZ@)))
+    => @vcS@ (@vcS@ (@vcS@ @vcZ@))
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Type Families}
+  At \htycon{Type} level:
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE DataKinds #-}
+    {-# LANGUAGE TypeFamilies #-}
+
+    data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
+
+    type family @tfAdd@ (n :: @dkNat@) (m :: @dkNat@) where
+      @tfAdd@ @tc'@@vcZ@     m = m
+      @tfAdd@ (@tc'@@vcS@ n) m = @tc'@@vcS@ (@tfAdd@ n m)
+
+       @tfAdd@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) (@tc'@@vcS@ @tc'@@vcZ@)
+    => @tc'@@vcS@ (@tfAdd@ (@tc'@@vcS@ @tc'@@vcZ@) (@tc'@@vcS@ @tc'@@vcZ@))
+    => @tc'@@vcS@ (@tc'@@vcS@ (@tfAdd@ @tc'@@vcZ@ (@tc'@@vcS@ @tc'@@vcZ@)))
+    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Type Operators}
+  Allows usage of symbols in place of \htycon{Type} constructors and \htycon{Type} families.
+
+  \begin{lstlisting}[style=hask]
+    {-# LANGUAGE DataKinds #-}
+    {-# LANGUAGE TypeFamilies #-}
+    {-# LANGUAGE TypeOperators #-}
+
+    data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
+
+    type family (@tf:+@) (n :: @dkNat@) (m :: @dkNat@) where
+      @tc'@@vcZ@     @tf:+@ m = m
+      (@tc'@@vcS@ n) @tf:+@ m = @tc'@@vcS@ (n @tf:+@ m)
+
+       (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)
+    => @tc'@@vcS@ ((@tc'@@vcS@ @tc'@@vcZ@) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@))
+    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcZ@ @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)))
+    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
+  \end{lstlisting}
 \end{frame}
 
 
-\begin{frame}[fragile]{Head of the List}
-  \texttt{head} returns the first element of the list:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Dependent Type Programming with Vectors}
+
+\begin{frame}[fragile]{Extended Haskell}
+  Assume \texttt{LANGUAGE extensions} are turned on from now on.
+  
+  \ \\
+  \pause
+  Assume import of module \texttt{GHC.TypeLits}, and (\htyfam{:+}) for \htyfam{Add} type families.
+
+  \ \\
+  \pause
+  Bad news, no more translations :(
+\end{frame}
+
+\begin{frame}[fragile]{Vectors}
+  Like \htycon{List}, but also indexed by \hkind{Nat} to indicate length.
+
+  \ \\
+  \pause
+  \htycon{List}:
+  \begin{lstlisting}[style=hask]
+    data List a where
+      Nil  :: List a
+      Cons :: a -> List a -> List a
+  \end{lstlisting}
+
+  \pause
+  \htycon{Vector}:
+  \begin{lstlisting}[style=hask]
+    -- n :+ 1 @|$\sim$@ 'S n
+    data Vect (n :: @dkNat@) a where
+      VNil :: Vect @vc0@ a
+      (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
+
+    vs :: Vect @vc6@ Int
+    vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Head}
+  \texttt{head} returns the first element of the \htycon{List}:
   \begin{lstlisting}[style=hask]
     -- from standard library
+    -- useless unless knowing list is non-empty
     head :: @tc[@a@tc]@ -> a
     head @vc[]@     = error "empty list"
     head (x@vc:@xs) = x
   \end{lstlisting}
 
-  \texttt{Elm} updated to:
+  \pause
+  \texttt{Elm} now uses \htycon{Maybe}:
   \begin{lstlisting}[style=hask]
-    head :: @tc[@a@tc]@ -> Maybe a
-    head @vc[]@     = Nothing
-    head (x@vc:@xs) = Just x
+    mhead :: @tc[@a@tc]@ -> Maybe a
+    mhead @vc[]@     = Nothing
+    mhead (x@vc:@xs) = Just x
   \end{lstlisting}
 
-  Alternatively:
+  \pause
+  With \htycon{Vector}:
   \begin{lstlisting}[style=hask]
-    head :: @tc[@a@tc]@ -> Either String a
-    head @vc[]@     = Left "empty list"
-    head (x@vc:@xs) = Right x
+    vhead :: Vect (@tc'@@vcS@ n) a -> Vect n a
+    vhead (x@vc:>@xs) = x
   \end{lstlisting}
 \end{frame}
+
+\begin{frame}[fragile]{Append}
+  \texttt{append} concatenate 2 \htycon{Lists}:
+  \begin{lstlisting}[style=hask]
+    append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
+    append @vc[]@     ys = ys
+    append (x@vc:@xs) ys = x @vc:@ append xs ys
+  \end{lstlisting}
+
+  \pause
+  With \htycon{Vector}:
+  \begin{lstlisting}[style=hask]
+    vappend :: Vect n a -> Vect m a -> Vect (n @tf:+@ m) a
+    vappend VNil    ys = ys
+    vappend (x@vc:>@xs) ys = x @vc:>@ vappend xs ys
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Map}
+  \texttt{map} map a function over a \htycon{List}:
+  \begin{lstlisting}[style=hask]
+    map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
+    map f @vc[]@     = @vc[]@
+    map f (x@vc:@xs) = f x @vc:@ map f xs
+  \end{lstlisting}
+
+  \pause
+  With \htycon{Vector}:
+  \begin{lstlisting}[style=hask]
+    vmap :: (a -> b) -> Vect n a -> Vect n b
+    vmap f VNil    = VNil
+    vmap f (x@vc:>@xs) = f x @vc:>@ vmap f xs
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Zip}
+  \texttt{zip} creates pair-wise tuples:
+  \begin{lstlisting}[style=hask]
+    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[@(a@tc,@b)@tc]@
+    zip (x@vc:@xs) (y@vc:@ys) = (x@vc,@y) @vc:@ zip xs ys
+    zip xs     ys     = @vc[]@
+  \end{lstlisting}
+
+  \pause
+  With \htycon{Vector}:
+  \begin{lstlisting}[style=hask]
+    vzip :: Vect n a -> Vect n b -> Vect n (a@tc,@ b)
+    vzip (x@vc:>@xs) (y@vc:>@ys) = (x@vc,@y) @vc:>@ vzip xs ys
+    vzip VNil    VNil    = VNil
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{zip}
+  \texttt{zip2} with \htyfam{Min} type family:
+  \begin{lstlisting}[style=hask]
+    type family Min (n :: @dkNat@) (m :: @dkNat@) where
+      Min @tc'@@vcZ@      m     = @tc'@@vcZ@
+      Min n      @tc'@@vcZ@     = @tc'@@vcZ@
+      Min (@tc'@@vcS@ n) (@tc'@@vcS@ m) = @tc'@@vcS@ (Min n m)
+
+    vzip2 :: Vect n a -> Vect m b -> Vect (Min n m) (a@tc,@ b)
+    vzip2 (x@vc:>@xs) (y@vc:>@ys) = (x@vc,@y) @vc:>@ vzip xs ys
+    vzip2 xs      VNil    = VNil
+    vzip2 VNil    ys      = VNil
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Heterogeneous List}
+  Heterogeneous \htycon{List} indexed by \htycon{List} of \htycon{Types}:
+  \begin{lstlisting}[style=hask]
+    data HList (t :: @dk[@@dk*@@dk]@) where
+      HNil  :: HList @tc'@@vc[]@
+      HCons :: t -> HList ts -> HList (t @tc'@@vc:@ ts)
+
+    defaults :: HList @tc'@@vc[@Int, Bool, Maybe a@vc]@
+    defaults = HCons @vc0@ (HCons False (HCons Nothing HNil))
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Heterogeneous Vector}
+  Heterogeneous \htycon{Vector} indexed by a \htycon{Vector} of \htycon{Types}:
+  \begin{lstlisting}[style=hask]
+    data HVect (n :: @dkNat@) (t :: @dk[@@dk*@@dk]@) where
+      HVNil  :: HVect @tc'@@vcZ@ @tc'@@vc[]@
+      HVCons :: t -> HVect n ts -> HVect (@tc'@@vcS@ n) (t @tc'@@vc:@ ts)
+
+    defaults :: HVect @vc3@ @tc'@@vc[@Int, Bool, Maybe a@vc]@
+    defaults = HVCons @vc0@ (HVCons False (HVCons Nothing HVNil))
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Heterogeneous Vector}
+  I lied, last loose translation:
+  \begin{lstlisting}[style=hask]
+    enum HVect<@dkNat@ n, List<@dk*@> T> {
+      HVect<@vc0@, @vcNil@> HVNil,
+      HVect<n @tf+@ @vc1@, Cons(t,ts)> HVCons(T t, HVect<n, List<@dk*@ ts)
+    }
+
+    HVect<@vc3@, Cons(Int, Cons(Bool, Cons(Maybe a, Nil)))> defauts =
+    HVCons(@vc0@, HVCons(False, HVCons(Nothing, HVNil)));
+  \end{lstlisting}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Pi and Sigma Types}
+
+\begin{frame}[fragile]{Pi Types}
+  \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures:
+  \begin{lstlisting}[style=hask]
+    vreplicate :: pi. (n :: @tcNat@) -> a -> Vect n a
+  \end{lstlisting}
+
+  \ \\
+  \pause
+  Simulates with \texttt{singleton types} via \htyfam{Sing} data family in \texttt{Haskell}.\\
+  New language extension planned for 7.12.1 release this December should make this nicer.
+\end{frame}
+
+\begin{frame}[fragile]{Sigma Types}
+  \texttt{$\Sigma$-types} - tuple where 2\textsuperscript{nd} value depends on 1\textsuperscript{st}:
+  \begin{lstlisting}[style=hask]
+    filter :: (a -> Bool) -> @tc[@a@tc]@ -> @tc[@a@tc]@
+
+    -- using Idris's ** dependent pair syntax
+    vfilter :: (a -> Bool) -> Vect n a -> (p :: @dkNat@ @tc**@ Vect p a)
+  \end{lstlisting}
+
+  \ \\
+  \pause
+  Credit to Ertugrul S\"oylemez: 
+  \begin{lstlisting}[style=hask]
+    data @tcSigma@ :: @dkKProxy@ a -> (a -> @dk*@) -> @dk*@ where
+      @vcExists@ :: @tfSing@ (x :: a) -> b x -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
+  \end{lstlisting}
+\end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Q & A
@@ -1428,9 +1695,13 @@
       \begin{itemize}
         \item termination and totality check
         \item disallow partial functions
-        \item distinguish between \hkeyword{data} and \hkeyword{codata}
+        \item distinction between \hkeyword{data} and \hkeyword{codata}
       \end{itemize}
+    \pause
     \item Proof assistant languages
+      \begin{itemize}
+        \item Ph.D. first please
+      \end{itemize}
   \end{itemize}
 \end{frame}
 
