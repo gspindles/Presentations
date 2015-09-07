@@ -320,7 +320,7 @@
     data @tcWeekdays@ = @vcSunday@ | @vcMonday@ | @vcTuesday@ | @vcWednesday@
                   | @vcThursday@ | @vcFriday@ | @vcSaturday@
   \end{lstlisting}
-  \textit{\tiny{Does this remind you of anything?}}
+% \textit{\tiny{Does this remind you of anything?}}
 
   \ \\
   \pause
@@ -436,7 +436,7 @@
   \begin{lstlisting}[style=hask]
        data @tcTuple@ a b = @vcTuple@ a b
     => data (@tc,@) a b = (@vc,@) a b
-    => data (a@tc,@ b@tc)@ = (a@vc,@ b)
+    => data (a@tc,@ b) = (a@vc,@ b)
   \end{lstlisting}
 
   \pause
@@ -485,10 +485,10 @@
   \begin{lstlisting}[style=hask]
     type @tcOccupation@ = Maybe String
 
-    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcOccupation@)
-    barbara = (@vcPerson@ "Barbara" "Smith" @vc30,@ Just "dancer")
-    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing)
-    luffy   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@ Just "pirate")
+    barbara2, chet2, luffy2 :: (@tcPerson@@tc,@ @tcOccupation@)
+    barbara2 = (@vcPerson@ "Barbara" "Smith" @vc30,@ Just "dancer")
+    chet2    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing)
+    luffy2   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@ Just "pirate")
   \end{lstlisting}
 \end{frame}
 
@@ -526,13 +526,13 @@
   \begin{lstlisting}[style=hask]
     type @tcEarning@ = Either String Int
 
-    barbara, chet, luffy :: (@tcPerson@@tc,@ @tcEarning@)
-    barbara = (@vcPerson@ "Barbara" "Smith" @vc30,@
-              Right @vc100000@)
-    chet    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
-              Left "Is a baby") 
-    luffy   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@
-              Right @vc2000000@)
+    barbara3, chet3, luffy3 :: (@tcPerson@@tc,@ @tcEarning@)
+    barbara3 = (@vcPerson@ "Barbara" "Smith" @vc30,@
+               Right @vc100000@)
+    chet3    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
+               Left "Is a baby") 
+    luffy3   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@
+               Right @vc2000000@)
   \end{lstlisting}
 \end{frame}
 
@@ -936,7 +936,7 @@
   \pause
   Q: But how?\\
   \pause
-  A: What if I told you\ldots\\
+  A: What if I tell you\ldots\\
   \pause
   \qquad \ldots you should already be familiar with 2 axes of extension :)
 \end{frame}
@@ -1018,9 +1018,9 @@
   \pause
   => \texttt{Parametric polymorphism} of $\lambda2$ again
 
-  \ \\
-  \pause
-  \textit{\tiny{Are we seeing a pattern yet?}}
+%  \ \\
+%  \pause
+%  \textit{\tiny{Are we seeing a pattern yet?}}
 \end{frame}
 
 \begin{frame}[fragile]{Value and Type Interdependency}
@@ -1041,6 +1041,15 @@
 
 \begin{frame}[fragile]{Lambda Cube}
   \includegraphics[scale=0.6]{Lambda_cube.png}
+\end{frame}
+
+\begin{frame}[fragile]{Dependent Types}
+  Why do we want them?
+  \begin{itemize}
+    \item more expressive \texttt{type system}
+    \item encode stronger invariants
+    \item proving correctness of code
+  \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{System F$_c$}
@@ -1082,6 +1091,7 @@
 \begin{frame}[fragile]{Teaser}
   Example please:
   \begin{lstlisting}[style=hask]
+    infixr @vc5@ @vc:>@
     data Vect (n :: @dkNat@) a where
       VNil :: Vect @vc0@ a
       (@vc:>@) :: a -> Vect n a -> Vect (n @tf+@ @vc1@) a
@@ -1231,7 +1241,10 @@
     @stBOX@ :: @stBOX@
   \end{lstlisting}
 
-  All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2. In next release or so, the \hsort{Sort} \hsort{BOX} will likely go away.
+  All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2.
+  
+  \ \\
+  \textit{\tiny{All of this will be changed with the next release.}}
 \end{frame}
 
 
@@ -1382,25 +1395,6 @@
 
     data Bool = False | True
 
-    data @tcTextInput@ a where
-      @vcRawText@  :: String -> @tcTextInput@ @tc'@False
-      @vcSafeText@ :: String -> @tcTextInput@ @tc'@True
-
-    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'@True
-    sanitize (@vcRawText@ str)  = @vcSafeText@ (htmlEncode str)
-    sanitize (@vcSafeText@ str) = @vcSafeText@ str
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Example}
-  Example with GADTs:
-  \begin{lstlisting}[style=hask]
-    {-# LANGUAGE DataKinds #-}
-    {-# LANGUAGE GADTs #-}
-    {-# LANGUAGE KindSignatures #-}
-
-    data Bool = False | True
-
     data @tcTextInput@ (a :: Bool) where
       @vcRawText@  :: String -> @tcTextInput@ @tc'@False
       @vcSafeText@ :: String -> @tcTextInput@ @tc'@True
@@ -1427,8 +1421,8 @@
 
     @tcTextInput@<@tc'@True> sanitize(@tcTextInput@<B> input) {
       switch input:
-        case @vcRawText@(str):
-          return @vcSafeText@(htmlEncode(str));
+        case @vcRawText@(input):
+          return @vcSafeText@(htmlEncode(input));
         default:
           return input;
     }
@@ -1441,7 +1435,7 @@
 
   \ \\
   \pause
-  Comes in 2 types:
+  Comes in 2 flavors:
   \begin{itemize}
     \item type synonym families
     \item data families
@@ -1449,7 +1443,7 @@
 
   \ \\
   \pause
-  and in a few flavors:
+  and in a few properties:
   \begin{itemize}
     \item associated vs. unassociated
     \item open vs. closed\textsuperscript{1}
@@ -1519,10 +1513,6 @@
 
 \begin{frame}[fragile]{Extended Haskell}
   Assume \texttt{LANGUAGE extensions} are turned on from now on.
-  
-  \ \\
-  \pause
-  Assume import of module \texttt{GHC.TypeLits}, and (\htyfam{:+}) for \htyfam{Add} type families.
 
   \ \\
   \pause
@@ -1547,8 +1537,35 @@
     -- 'Z @|$\sim$@ 0
     -- 'S n @|$\sim$@ n :+ 1
     data Vect (n :: @dkNat@) a where
-      VNil :: Vect @tc'@@vcZ@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (@tc'@@vcS@ n) a
+      VNil :: Vect @vcZ@ a
+      (@vc:>@) :: a -> Vect n a -> Vect (@vcS@ n) a
+
+    type @tcSix@ = @vcS@ (@vcS@ (@vcS@ (@vcS@ (@vcS@ (@vcS@ @vcZ@)))))
+    vs :: Vect @tcSix@ Int
+    vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Vectors}
+  Like \htycon{List}, but also indexed by \hkind{Nat} to indicate length.
+
+  \ \\
+  \pause
+  \htycon{List}:
+  \begin{lstlisting}[style=hask]
+    data List a where
+      Nil  :: List a
+      Cons :: a -> List a -> List a
+  \end{lstlisting}
+
+  \pause
+  Module GHC.TypeLits provide texttt{type-level literals}:
+  \begin{lstlisting}[style=hask]
+    -- 'Z @|$\sim$@ 0
+    -- 'S n @|$\sim$@ n :+ 1
+    data Vect (n :: @dkNat@) a where
+      VNil :: Vect @vc0@ a
+      (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
 
     vs :: Vect @vc6@ Int
     vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
@@ -1576,7 +1593,7 @@
   \pause
   With \htycon{Vector}:
   \begin{lstlisting}[style=hask]
-    vhead :: Vect (@tc'@@vcS@ n) a -> Vect n a
+    vhead :: Vect (@vcS@ n) a -> a
     vhead (x@vc:>@xs) = x
   \end{lstlisting}
 \end{frame}
@@ -1636,12 +1653,12 @@
   \texttt{zip2} with \htyfam{Min} type family:
   \begin{lstlisting}[style=hask]
     type family Min n m where
-      Min @tc'@@vcZ@     m      = @tc'@@vcZ@
-      Min n      @tc'@@vcZ@     = @tc'@@vcZ@
-      Min (@tc'@@vcS@ n) (@tc'@@vcS@ m) = @tc'@@vcS@ (Min n m)
+      Min @vcZ@     m     = @vcZ@
+      Min n     @vcZ@     = @vcZ@
+      Min (@vcS@ n) (@vcS@ m) = @vcS@ (Min n m)
 
     vzip2 :: Vect n a -> Vect m b -> Vect (Min n m) (a@tc,@ b)
-    vzip2 (x@vc:>@xs) (y@vc:>@ys) = (x@vc,@y) @vc:>@ vzip xs ys
+    vzip2 (x@vc:>@xs) (y@vc:>@ys) = (x@vc,@y) @vc:>@ vzip2 xs ys
     vzip2 xs      VNil    = VNil
     vzip2 VNil    ys      = VNil
   \end{lstlisting}
@@ -1653,24 +1670,26 @@
 \begin{frame}[fragile]{Heterogeneous List}
   Heterogeneous \htycon{List} indexed by \htycon{List} of \htycon{Types}:
   \begin{lstlisting}[style=hask]
+    infixr @vc5@ @vc::>@
     data HList (t :: @dk[@@dk*@@dk]@) where
       HNil  :: HList @tc'@@vc[]@
-      HCons :: t -> HList ts -> HList (t @tc'@@vc:@ ts)
+      (@vc::>@) :: t -> HList ts -> HList (t @tc'@@vc:@ ts)
 
     defaults :: HList @tc'@@vc[@Int, Bool, Maybe a@vc]@
-    defaults = HCons @vc0@ (HCons False (HCons Nothing HNil))
+    defaults = @vc0@ @vc::>@ False @vc::>@  Nothing @vc::>@ HNil
   \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Heterogeneous Vector}
   Heterogeneous \htycon{Vector} indexed by a \htycon{List} of \htycon{Types}:
   \begin{lstlisting}[style=hask]
+    infixr @vc5@ @vc:>>@
     data HVect (n :: @dkNat@) (t :: @dk[@@dk*@@dk]@) where
-      HVNil  :: HVect @tc'@@vcZ@ @tc'@@vc[]@
-      HVCons :: t -> HVect n ts -> HVect (@tc'@@vcS@ n) (t @tc'@@vc:@ ts)
+      HVNil  :: HVect @vcZ@ @tc'@@vc[]@
+      (@vc:>>@) :: t -> HVect n ts -> HVect (@vcS@ n) (t @tc'@@vc:@ ts)
 
-    defaults :: HVect @vc3@ @tc'@@vc[@Int, Bool, Maybe a@vc]@
-    defaults = HVCons @vc0@ (HVCons False (HVCons Nothing HVNil))
+    vdefaults :: HVect @vc3@ @tc'@@vc[@Int, Bool, Maybe a@vc]@
+    vdefaults = @vc0@ @vc:>>@ False @vc:>>@ Nothing @vc:>>@ HVNil
   \end{lstlisting}
 \end{frame}
 
@@ -1701,7 +1720,7 @@
   \ \\
   \pause
   Emulates with \texttt{singleton types} via \htyfam{Sing} data family in \texttt{Haskell}.\\
-  New language extension planned for 7.12.1 release this December should make this nicer.
+  Upcoming release next January should make this nicer.
 \end{frame}
 
 \begin{frame}[fragile]{Sigma Types}
