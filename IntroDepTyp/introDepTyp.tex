@@ -136,7 +136,7 @@
   % type families
   emph=
   {[8]
-    Plus,Mult,Min
+    Sing,Plus,Mult,Min
   },
   emphstyle={[8]\color{Green}\textbf},
   % foreign languages
@@ -1711,25 +1711,55 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Pi and Sigma Types}
 
-\begin{frame}[fragile]{Pi Types}
-  \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures:
+\begin{frame}[fragile]{Replicate and Filter}
+  \texttt{replicate} repeats an element n times:
   \begin{lstlisting}[style=hask]
-    vreplicate :: pi. (n :: @tcNat@) -> a -> Vect n a
+    replicate :: Int -> a -> @tc[@a@tc]@
+    replicate @vc0@ x = @vc[]@
+    replicate n x = x @vc:@ replicate (n - @vc1@) x
   \end{lstlisting}
 
   \ \\
   \pause
-  Emulates with \texttt{singleton types} via \htyfam{Sing} data family in \texttt{Haskell}.\\
-  Upcoming release next January should make this nicer.
+  \texttt{filter} selects elements from a list for given predicate:
+  \begin{lstlisting}[style=hask]
+    filter :: (a -> Bool) -> @tc[@a@tc]@ -> @tc[@a@tc]@
+    filter f @vc[]@     = @vc[]@
+    filter f (x@vc:@xs) = if f x
+                      then x @vc:@ filter f xs
+                      else filter f xs
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Pi Types}
+  \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures. Fake by deriving \texttt{singleton instances} of \htyfam{Sing} data family to reflect values at the type level.
+  \begin{lstlisting}[style=hask]
+    -- fake with singleton types
+    data instance Sing (n :: @tcNat@) where
+      @vcSZ@ :: Sing @vcZ@
+      @vcSS@ :: Sing n -> Sing (@vcS@ n)
+
+    -- so we have
+    @vcSZ@ :: Sing @vcZ@
+    @vcSS@ @vcSZ@ :: Sing (@vcS@ @vcZ@)
+    @vcSS@ (@vcSS@ @vcSZ@) :: Sing (@vcS@ (@vcS@ @vcZ@))
+
+    @|\pause@-- finally:
+    vreplicate :: Sing (n :: @tcNat@) -> a -> Vect n a
+    vreplicate @vcSZ@     a = @vcVNil@
+    vreplicate (@vcSS@ n) a = a @vc:>@ vreplicate n a
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Sigma Types}
   \texttt{$\Sigma$-types} - tuple where 2\textsuperscript{nd} value depends on 1\textsuperscript{st}:
   \begin{lstlisting}[style=hask]
-    filter :: (a -> Bool) -> @tc[@a@tc]@ -> @tc[@a@tc]@
-
     -- using Idris's ** dependent pair syntax
-    vfilter :: (a -> Bool) -> Vect n a -> (p :: @dkNat@ @tc**@ Vect p a)
+       (@vc3@ @vc**@ 'a' @vc:>@ 'b' @vc:>@ 'c' @vc:>@ @vcVNil@)
+    :: (n :: Nat @tc**@ @tcVect@ n @tcChar@)
+
+    vfilter :: (a -> Bool) -> Vect n a
+            -> (p :: @dkNat@ @tc**@ Vect p a)
   \end{lstlisting}
 
   \ \\
@@ -1737,7 +1767,8 @@
   Credit to Ertugrul S\"oylemez: 
   \begin{lstlisting}[style=hask]
     data @tcSigma@ :: @dkKProxy@ a -> (a -> @dk*@) -> @dk*@ where
-      @vcExists@ :: @tfSing@ (x :: a) -> b x -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
+      (@vc**@) :: @tfSing@ (x :: a) -> b x
+           -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
   \end{lstlisting}
 \end{frame}
 

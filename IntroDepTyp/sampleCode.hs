@@ -1,8 +1,13 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+
+import Data.Proxy
+import Data.Singletons
 
 data Person = Person String String Int
               deriving (Show, Eq)
@@ -74,6 +79,16 @@ lmap f (x:xs) = f x : map f xs
 lzip :: [a] -> [b] -> [(a,b)]
 lzip (x:xs) (y:ys) = (x,y) : zip xs ys
 lzip _      _      = []
+
+lreplicate :: Int -> a -> [a]
+lreplicate 0 x = []
+lreplicate n x = x : replicate (n - 1) x
+
+lfilter :: (a -> Bool) -> [a] -> [a]
+lfilter f []     = []
+lfilter f (x:xs) = if f x
+                   then x : filter f xs
+                   else filter f xs
 
 
 type ShowCxt a b = (Show a, Show b)
@@ -168,19 +183,17 @@ type Three = S (S (S Z))
 vdefaults :: HVect Three '[Int, Bool, Maybe a]
 vdefaults = 0 :>> False :>> Nothing :>> HVNil
 
+data instance Sing (n :: Nat) where
+  SZ :: Sing Z
+  SS :: Sing n -> Sing (S n)
+
+type SNat (n :: Nat) = Sing n
+
+vreplicate :: Sing (n :: Nat) -> a -> Vect n a
+vreplicate SZ     a = VNil
+vreplicate (SS n) a = a :> vreplicate n a
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+data Sigma :: KProxy a -> (a -> *) -> * where
+  Exists :: Sing (x :: a) -> b x -> Sigma ('KProxy :: KProxy a) b
 
