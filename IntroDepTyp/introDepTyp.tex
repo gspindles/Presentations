@@ -10,7 +10,7 @@
 \title{Introduction to Dependent Types}
 \subtitle{Eagan Technology Unconference}
 \author{Joseph Ching}
-\date{September 22, 2015}
+\date{September 11, 2015}
 
 \usetheme{Antibes}
 \usecolortheme{beaver}
@@ -581,7 +581,7 @@
 
   With:
   \begin{lstlisting}[style=hask]
-    Nil :: List a
+    Nil  :: List a
     Cons :: a -> List a -> List a
   \end{lstlisting}
 
@@ -636,7 +636,7 @@
   \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
-    Bool even (Int n) {
+    Bool even(Int n) {
       switch n:
         case n == @vc0@:
           return True;
@@ -662,7 +662,7 @@
   \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
-    Int toInt (@tcNat@ n) {
+    Int toInt(@tcNat@ n) {
       switch n:
         case @vcZ@:
           return @vc0@;
@@ -862,7 +862,7 @@
   \pause
   A translation:
   \begin{lstlisting}[style=hask]
-    List<@tcTuple@<A, B>> zip(List<A> l1, List<A> l2) {
+    List<@tcTuple@<A, B>> zip(List<A> l1, List<B> l2) {
       switch l1:
         case Nil:
           return Nil;
@@ -989,7 +989,7 @@
              else False
   \end{lstlisting}
 
-  \qquad f maps \hvalcon{numbers} to \hvalcon{True} and \hvalcon{False}.
+  \qquad \texttt{even} maps \hvalcon{Int}s to \hvalcon{True} and \hvalcon{False}.
   \ \\
   \pause
   => \hvalcon{Values} on RHS depends on the \hvalcon{Values} on LHS
@@ -1244,7 +1244,7 @@
   All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2.
   
   \ \\
-  \textit{\tiny{All of this will be changed with the next release.}}
+  \textit{\tiny{All of this will be changed with the next GHC 8.0 release.}}
 \end{frame}
 
 
@@ -1372,7 +1372,7 @@
 \begin{frame}[fragile]{DataKinds}
   Example:
   \begin{lstlisting}[style=hask]
-    data Nat = Z | S Nat
+    data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
   \end{lstlisting}
 
   With DataKinds, we get something like:
@@ -1443,7 +1443,7 @@
 
   \ \\
   \pause
-  and in a few properties:
+  and have a few options:
   \begin{itemize}
     \item associated vs. unassociated
     \item open vs. closed\textsuperscript{1}
@@ -1549,8 +1549,6 @@
 \begin{frame}[fragile]{Vectors}
   Like \htycon{List}, but also indexed by \hkind{Nat} to indicate length.
 
-  \ \\
-  \pause
   \htycon{List}:
   \begin{lstlisting}[style=hask]
     data List a where
@@ -1558,8 +1556,7 @@
       Cons :: a -> List a -> List a
   \end{lstlisting}
 
-  \pause
-  Module GHC.TypeLits provide texttt{type-level literals}:
+  Module GHC.TypeLits provide \texttt{type-level literals}:
   \begin{lstlisting}[style=hask]
     -- 'Z @|$\sim$@ 0
     -- 'S n @|$\sim$@ n :+ 1
@@ -1693,19 +1690,19 @@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Heterogeneous Vector}
-  I lied, last translation$^*$:
-  \begin{lstlisting}[style=hask]
-    enum HVect<@dkNat@ n, List<@dk*@> T> {
-      HVect<@tc'@@vcZ@, @tc'@@vcNil@> HVNil,
-      HVect<@tc'@@vcS@ n, @tc'@Cons(t, ts)> HVCons(T t, HVect<n, List<@dk*@> ts)
-    }
-
-    HVect<@vc3@, @tc'@Cons(Int, @tc'@Cons(Bool, @tc'@Cons(Maybe a, @tc'@Nil)))> defauts =
-    new HVCons(@vc0@, HVCons(False, HVCons(Nothing, HVNil)));
-  \end{lstlisting}
-  \textit{\tiny{(*) supreme looseness and totally made-up syntax!!!}}
-\end{frame}
+%\begin{frame}[fragile]{Heterogeneous Vector}
+%  I lied, last translation$^*$:
+%  \begin{lstlisting}[style=hask]
+%    enum HVect<@dkNat@ n, List<@dk*@> T> {
+%      HVect<@tc'@@vcZ@, @tc'@@vcNil@> HVNil,
+%      HVect<@tc'@@vcS@ n, @tc'@Cons(t, ts)> HVCons(T t, HVect<n, List<@dk*@> ts)
+%    }
+%
+%    HVect<@vc3@, @tc'@Cons(Int, @tc'@Cons(Bool, @tc'@Cons(Maybe a, @tc'@Nil)))> defauts =
+%    new HVCons(@vc0@, HVCons(False, HVCons(Nothing, HVNil)));
+%  \end{lstlisting}
+%  \textit{\tiny{(*) supreme looseness and totally made-up syntax!!!}}
+%\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1732,7 +1729,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{Pi Types}
-  \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures. Fake by deriving \texttt{singleton instances} of \htyfam{Sing} data family to reflect values at the type level.
+  \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures. Fake by deriving \texttt{singleton instances} of \htyfam{Sing} data family to reflect values to the type level.
   \begin{lstlisting}[style=hask]
     -- fake with singleton types
     data instance Sing (n :: @tcNat@) where
