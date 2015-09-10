@@ -162,9 +162,9 @@
 %%% Table of Content
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Want to hide subsection slide by slide
-\begin{frame}{Table of Contents}
+\begin{frame}{Agenda}
   \tableofcontents[
-    pausesections,
+%   pausesections,
     sectionstyle=show,
     subsectionstyle=hide
   ]
@@ -182,20 +182,19 @@
 \end{frame}
 
 \begin{frame}{A Joke}
-  This is not a \texttt{m-} tutorial, \pause and nothing here will involve burritos.
+  This is not a \texttt{m-} tutorial, and nothing here will involve burritos.
 \end{frame}
 
+\begin{frame}{Disclaimer}
+  There will be many code examples with \textit{very} loose translations to imperative/OOP as we go along. Though please keep in mind that these are merely made up syntactical translations, the actual concepts may differ vastly.
+\end{frame}
 
 \begin{frame}{About This Talk}
   Example languages with dependent types:
-  \pause
   \begin{itemize}
     \item \texttt{Idris}
-    \pause
     \item \texttt{Epigram}
-    \pause
     \item \texttt{Agda}
-    \pause
     \item \texttt{Coq}
   \end{itemize}
 
@@ -208,8 +207,37 @@
     \textit{\tiny{Honestly, it's because they're way over his head...}}\\
 \end{frame}
 
-\begin{frame}{Disclaimer}
-  There will be many code examples with \textit{very} loose translations to imperative/OOP as we go along. Though please keep in mind that these are merely made up syntactical translations, the actual concepts may differ vastly.
+\begin{frame}[fragile]{Dependent Types}
+  Why do we want them?
+  \begin{itemize}
+    \item more expressive \texttt{type system}
+    \item encode stronger invariants
+    \item proving correctness of code
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Teaser}
+  Example please:
+  \begin{lstlisting}[style=hask]
+    infixr @vc5@ @vc:>@
+    data Vect (n :: @dkNat@) a where
+      VNil :: Vect @vc0@ a
+      (@vc:>@) :: a -> Vect n a -> Vect (n @tf+@ @vc1@) a
+
+    vs :: Vect @vc6@ Int
+    vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
+  \end{lstlisting}
+
+  Translation\textsuperscript{*} please:
+  \begin{lstlisting}[style=hask]
+    enum Vect<@dkNat@ n, A> {
+      Vect<@vc0@, A> VNil,
+      Vect<n @tf+@ @vc1@, A> VCons(A a, Vect<n, A> va)
+    }
+
+    Vect<@vc6@, Int> vs = VCons(@vc4@, VCons(@vc8@, VCons(@vc15@, VCons(@vc16@, VCons(@vc23@, VCons(@vc42@, VNil))))));
+  \end{lstlisting}
+  \textit{\tiny{(*) supreme looseness and totally made-up syntax!!!}}
 \end{frame}
 
 
@@ -225,45 +253,35 @@
   \hvalcon{Values} has \htycon{Types}, or \hvalcon{Values} are classified by \htycon{Types}.\\
 
   \begin{lstlisting}[style=hask]
-    @|\ldots@, @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@, @|\dots@ :: Int @|\pause@
+    @|\ldots@, @vc-1@, @vc0@, @vc1@, @vc2@, @vc3@, @|\dots@ :: Int
 
-    True, False :: Bool @|\pause@
+    True, False :: Bool
 
-    @str'a'@, @str'b'@, @str'c'@ :: Char @|\pause@
+    @str'a'@, @str'b'@, @str'c'@ :: Char
 
     "abc" :: String @|$\sim$@ @tc[@Char@tc]@
   \end{lstlisting}
-
-  \footnotesize{\hvalcon{Values} are also called \hvalcon{Terms}}
 \end{frame}
 
 \begin{frame}[fragile]{About Data Types}
   How are data types defined?\\
-  \pause
   \begin{itemize}
     \item Some are built in magic: \htycon{Int}, \htycon{Char}, function arrow
-    \pause
     \item Some are built in sugar: list, tuples
       \begin{itemize}
         \item We can define equivalent non-sugar version ourselves
       \end{itemize}
-    \pause
     \item Rest can be user defined: \htycon{Bool}, \htycon{String}, \htycon{Maybe}
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{About Data Types}
   What are the data types like?
-  \pause
   \begin{itemize}
     \item Multiple \hvalcon{Value} constructors
-    \pause
     \item Paremetrize over another \htycon{Type}
-    \pause
     \item Recursive definition
-    \pause
     \item Synonyms of other \htycon{Types}
-    \pause
     \item Combination of the above
   \end{itemize}
 \end{frame}
@@ -273,14 +291,12 @@
 \begin{frame}[fragile]{Defining Data Types}
   Define new data type with \hkeyword{data}.
 
-  \pause
   \ \\
   \begin{itemize}
     \item Left hand side (LHS) - \htycon{Type} constructor
     \item Right hand side (RHS) - \hvalcon{Value} constructor
   \end{itemize}
 
-  \pause
   \ \\
   \htycon{Type} and \hvalcon{Value} constructors are capticalized.
 \end{frame}
@@ -295,13 +311,11 @@
     barbara = @vcPerson@ "Barbara" "Smith" @vc30@
   \end{lstlisting}
 
-  \pause
   The \htycon{Type} of the \hvalcon{Person Value} constructor:
   \begin{lstlisting}[style=hask]
     @vcPerson@ :: String -> String -> Int -> @tcPerson@
   \end{lstlisting}
 
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum @tcPerson@ {
@@ -322,8 +336,6 @@
   \end{lstlisting}
 % \textit{\tiny{Does this remind you of anything?}}
 
-  \ \\
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum Bool { False, True }
@@ -341,7 +353,6 @@
     type @tcRadius@ = Double
   \end{lstlisting}
 
-  \pause
   For example:
   \begin{lstlisting}[style=hask]
     data @tcShape@ = @vcTriangle@ @tcSide@ @tcSide@ @tcSide@
@@ -349,7 +360,6 @@
                | @vcCircle@ @tcRadius@
   \end{lstlisting}
 
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum @tcShape@ {
@@ -368,7 +378,6 @@
                | @vcCircle@ @tcRadius@
   \end{lstlisting}
 
-  \pause
   \htycon{Types} of the 3 \hvalcon{Value} constructors:
   \begin{lstlisting}[style=hask]
     @vcTriangle@  :: @tcSide@ -> @tcSide@ -> @tcSide@ -> @tcShape@
@@ -376,7 +385,6 @@
     @vcCircle@    :: @tcRadius@ -> @tcShape@
   \end{lstlisting}
 
-  \pause
   Example \htycon{Shapes}:
   \begin{lstlisting}[style=hask]
     myTri, myRect, myCir :: @tcShape@
@@ -389,23 +397,21 @@
 \begin{frame}[fragile]{Parametrization}
   Types can parametrize over another type:
   \begin{lstlisting}[style=hask]
-    data @tcIdentity@ a = @vcIdentity@ a
+    data @tcId@ a = @vcId@ a
 
-    intIdwrtSum :: @tcIndentity@ Int
-    intIdwrtSum = @vcIdentity@ @vc0@
+    intIdwrtSum :: @tcId@ Int
+    intIdwrtSum = @vcId@ @vc0@
   \end{lstlisting}
 
-  \pause
   With:
   \begin{lstlisting}[style=hask]
-    @vcIdentity@ :: a -> @tcIdentity@ a
+    @vcId@ :: a -> @tcId@ a
   \end{lstlisting}
 
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
-    enum @tcIdentity@<A> {
-      @vcIdentity@(A a)
+    enum @tcId@<A> {
+      @vcId@(A a)
     }
   \end{lstlisting}
 \end{frame}
@@ -416,12 +422,10 @@
     data @tcTuple@ a b = @vcTuple@ a b
   \end{lstlisting}
 
-  \pause
   With:
   \begin{lstlisting}[style=hask]
     @vcTuple@ :: a -> b -> @tcTuple@ a b
   \end{lstlisting}
-  \pause
 
   A loose translation:
   \begin{lstlisting}[style=hask]
@@ -439,7 +443,6 @@
     => data (a@tc,@ b) = (a@vc,@ b)
   \end{lstlisting}
 
-  \pause
   An example:
   \begin{lstlisting}[style=hask]
     type @tcEmployed@ = Bool
@@ -457,14 +460,12 @@
     data Maybe a = Nothing | Just a
   \end{lstlisting}
 
-  \pause
   With:
   \begin{lstlisting}[style=hask]
     Nothing :: Maybe a
     Just    :: a -> Maybe a
   \end{lstlisting}
 
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum Maybe<A> {
@@ -480,7 +481,6 @@
     data Maybe a = Nothing | Just a
   \end{lstlisting}
 
-  \pause
   Say more with \htycon{Occupation}:
   \begin{lstlisting}[style=hask]
     type @tcOccupation@ = Maybe String
@@ -498,14 +498,12 @@
     data Either a b = Left a | Right b
   \end{lstlisting}
 
-  \pause
   With:
   \begin{lstlisting}[style=hask]
     Left  :: a -> Either a b
     Right :: b -> Either a b
   \end{lstlisting}
 
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum Either<A, B> {
@@ -521,7 +519,6 @@
     data Either a b = Left a | Right b
   \end{lstlisting}
 
-  \pause
   Refine with \htycon{Earning}:
   \begin{lstlisting}[style=hask]
     type @tcEarning@ = Either String Int
@@ -548,7 +545,6 @@
     @vcS@ :: @tcNat@ -> @tcNat@
   \end{lstlisting}
 
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum @tcNat@ {
@@ -585,7 +581,6 @@
     Cons :: a -> List a -> List a
   \end{lstlisting}
 
-  \pause
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum List<A> {
@@ -603,7 +598,6 @@
     => data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @tc[@a@tc]@
   \end{lstlisting}
 
-  \pause
   Sugar that \htycon{List}:
   \begin{lstlisting}[style=hask]
     ints :: List Int 
@@ -633,7 +627,6 @@
              else False
   \end{lstlisting}
 
-  \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
     Bool even(Int n) {
@@ -659,7 +652,6 @@
     toInt (@vcS@ n) = @vc1@ + toInt n
   \end{lstlisting}
 
-  \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
     Int toInt(@tcNat@ n) {
@@ -700,7 +692,6 @@
 
 %\begin{frame}[fragile]{Type of Functions}
 %  Q: Actual type of functions?\\
-%  \pause
 %  A: Built-in magic, it's called the $function\ arrow$, something like:
 %  \begin{lstlisting}[style=hask]
 %    data (->) a b = implementation
@@ -717,7 +708,6 @@
     id x = x
   \end{lstlisting}
 
-  \pause
   Not as loose translation:
   \begin{lstlisting}[style=hask]
     A id<A>(A a) {
@@ -736,7 +726,6 @@
     append (x@vc:@xs) ys = x @vc:@ append xs ys
   \end{lstlisting}
 
-  \pause
   A translation:
   \begin{lstlisting}[style=hask]
     List<A> append(List<A> l1, List<A> l2) {
@@ -787,7 +776,6 @@
     compose f g = \x -> f (g x)
   \end{lstlisting}
 
-  \pause
   Yay translations:
   \begin{lstlisting}[style=hask]
     B apply(Func<A, B> f, A a) {
@@ -808,7 +796,6 @@
     map f (x@vc:@xs) = f x @vc:@ map f xs
   \end{lstlisting}
 
-  \pause
   A translation:
   \begin{lstlisting}[style=hask]
     List<B> map(Func<A, B> f, List<A> la) {
@@ -859,7 +846,6 @@
     zip (x@vc:@xs) (y@vc:@ys) = (x@vc,@y) @vc:@ zip xs ys
   \end{lstlisting}
 
-  \pause
   A translation:
   \begin{lstlisting}[style=hask]
     List<@tcTuple@<A, B>> zip(List<A> l1, List<B> l2) {
@@ -913,31 +899,23 @@
 
 \begin{frame}[fragile]{$\lambda$-Calculus}
   So far, we have seen:
-  \pause
   \begin{itemize}
     \item function application
-    \pause
     \item function abstraction {\tiny(aka higher-order functions)}
-    \pause
     \item variable binding
-    \pause
     \item substitution
   \end{itemize}
-  \pause
   => basis for \texttt{simply typed $\lambda$-calculus}.
 \end{frame}
 
 \begin{frame}[fragile]{$\lambda$-Calculus}
   Q: Sure, but can we have more?\\
-  \pause
   A: Yes, extend \texttt{$\lambda$-calculus} so we can have more forms of abstractions.
 
   \ \\
   \pause
   Q: But how?\\
-  \pause
   A: What if I tell you\ldots\\
-  \pause
   \qquad \ldots you should already be familiar with 2 axes of extension :)
 \end{frame}
 
@@ -949,23 +927,18 @@
   Given data types \htycon{$T$} and \htycon{$P$}, if there is a relation between \htycon{$T$} and \htycon{$P$} by some notion of substitutability with \htycon{$T$} in place of \htycon{$P$}, then we say \htycon{$T$} is a \texttt{subtype} of the \texttt{supertype} \htycon{$P$}, denoted by \htycon{$T$} $<:$ \htycon{$P$}.
 
   \ \\
-  \pause
   The is an extension on \texttt{$\lambda$-calculus} with \texttt{subtype polymorphism} and is denoted by $\lambda_{<:}$.\\
-  \pause
   => \texttt{Object Oriented Programming}
   
   \ \\
-  \pause
   \scriptsize{Though this is not an axis that we are interested in}.
 \end{frame}
 
 \begin{frame}[fragile]{Parametric Polymorphism}
   Introduce a mechanism of \texttt{universal quantification} over \htycon{Types}: \htycon{Types} can abstract over \htycon{Types}, allows for \texttt{generic data types} and \texttt{generic functions}.\\
-  \pause
   => \texttt{Generic Programming}
 
   \ \\
-  \pause
   Recall:
   \begin{lstlisting}[style=hask]
     data Maybe a = Nothing | Just a
@@ -975,7 +948,6 @@
     map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
   \end{lstlisting}
 
-  \pause
   The name for this extension is formally \texttt{second order $\lambda$-calculus}, aka \texttt{System F}, denoted by $\lambda2$,
 \end{frame}
 
@@ -991,10 +963,8 @@
 
   \qquad \texttt{even} maps \hvalcon{Int}s to \hvalcon{True} and \hvalcon{False}.
   \ \\
-  \pause
   => \hvalcon{Values} on RHS depends on the \hvalcon{Values} on LHS
   \ \\
-  \pause
   => \hvalcon{Values} depending on \hvalcon{Values}
 \end{frame}
 
@@ -1006,35 +976,26 @@
     data List a = Nil | Cons a (List a)
   \end{lstlisting}
 
-  \pause
   \qquad \htycon{Maybe} and \htycon{List} take a \htycon{Type} and return \hvalcon{Value} constructors
   \ \\
-  \pause
   => \hvalcon{Values} on RHS depends on the \htycon{Type} on LHS
   \ \\
-  \pause
   => \hvalcon{Values} depending on \htycon{Types}
   \ \\
-  \pause
   => \texttt{Parametric polymorphism} of $\lambda2$ again
 
 %  \ \\
-%  \pause
 %  \textit{\tiny{Are we seeing a pattern yet?}}
 \end{frame}
 
 \begin{frame}[fragile]{Value and Type Interdependency}
   Then what about the other cases of dependencies?
-  \pause
   \begin{itemize}
     \item \hvalcon{Values} depending on \hvalcon{Values}: \texttt{$\lambda$-calculus}
-    \pause
     \item \hvalcon{Values} depending on \htycon{Types}: $\lambda2$, \texttt{System F}
-    \pause
-    \item \htycon{Types} depending on \htycon{Types}: \pause$\lambda\underline\omega$\\
+    \item \htycon{Types} depending on \htycon{Types}: $\lambda\underline\omega$\\
       => \texttt{Type-level programming} via \texttt{type operators}
-    \pause
-    \item \htycon{Types} depending on \hvalcon{Values}: \pause$\lambda\Pi$\\
+    \item \htycon{Types} depending on \hvalcon{Values}: $\lambda\Pi$\\
       => \texttt{Dependent types}
   \end{itemize}
 \end{frame}
@@ -1043,30 +1004,18 @@
   \includegraphics[scale=0.6]{Lambda_cube.png}
 \end{frame}
 
-\begin{frame}[fragile]{Dependent Types}
-  Why do we want them?
-  \begin{itemize}
-    \item more expressive \texttt{type system}
-    \item encode stronger invariants
-    \item proving correctness of code
-  \end{itemize}
-\end{frame}
-
 \begin{frame}[fragile]{System F$_c$}
   Currently, \texttt{Haskell} as of GHC 7.10.2
   \begin{itemize}
     \item no true \texttt{type operators}
-    \pause
     \item \texttt{type-level programming} through:
       \begin{itemize}
         \item \texttt{type families}
-        \pause
         \item \texttt{equalities} on \htycon{Types}
       \end{itemize}
   \end{itemize}
 
   \ \\
-  \pause
   This axis of extension on $\lambda2$ is termed \texttt{System F$_c$}.
 \end{frame}
 
@@ -1074,43 +1023,15 @@
   Currently, \texttt{Haskell} as of GHC 7.10.2
   \begin{itemize}
     \item not truely dependent either:
-    \pause
       \begin{itemize}
         \item strong distinction between \hvalcon{Values} and \htycon{Types}
       \end{itemize}
-    \pause
     \item emulate \texttt{dependent types} with:
       \begin{itemize}
         \item handful of \texttt{language extensions}
-        \pause
         \item \hkind{Kind} system
       \end{itemize}
   \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Teaser}
-  Example please:
-  \begin{lstlisting}[style=hask]
-    infixr @vc5@ @vc:>@
-    data Vect (n :: @dkNat@) a where
-      VNil :: Vect @vc0@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (n @tf+@ @vc1@) a
-
-    vs :: Vect @vc6@ Int
-    vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
-  \end{lstlisting}
-
-  \pause
-  Translation\textsuperscript{*} please:
-  \begin{lstlisting}[style=hask]
-    enum Vect<@dkNat@ n, A> {
-      Vect<@vc0@, A> VNil,
-      Vect<n @tf+@ @vc1@, A> VCons(A a, Vect<n, A> va)
-    }
-
-    Vect<@vc6@, Int> vs = VCons(@vc4@, VCons(@vc8@, VCons(@vc15@, VCons(@vc16@, VCons(@vc23@, VCons(@vc42@, VNil))))));
-  \end{lstlisting}
-  \textit{\tiny{(*) supreme looseness and totally made-up syntax!!!}}
 \end{frame}
 
 
@@ -1124,7 +1045,6 @@
 
 \begin{frame}[fragile]{Kinds}
   Q: \htycon{Types} classify \hvalcon{Values}, but what classifies \htycon{Types}?\\
-  \pause
   A: \hkind{Kinds}
 \end{frame}
 
@@ -1138,13 +1058,12 @@
     data (a@tc,@ b) = (a@vc,@ b)
     data Either a b = Left a | Right b
 
-    @|\pause@
-    Int :: @dk*@@|\pause@
-    Bool :: @|\pause@@dk*@@|\pause@
-    @tc[@Int@tc]@ :: @|\pause@@dk*@@|\pause@
-    @tc[]@ :: @|\pause@@dk*@ -> @dk*@@|\pause@
-    Maybe @tcPerson@ :: @|\pause@@dk*@@|\pause@
-    Maybe :: @|\pause@@dk*@ -> @dk*@
+    Int :: @dk*@
+    Bool :: @dk*@
+    @tc[@Int@tc]@ :: @dk*@
+    @tc[]@ :: @dk*@ -> @dk*@
+    Maybe @tcPerson@ :: @dk*@
+    Maybe :: @dk*@ -> @dk*@
   \end{lstlisting}
 \end{frame}
 
@@ -1158,22 +1077,21 @@
     data (a@tc,@ b) = (a@vc,@ b)
     data Either a b = Left a | Right b
 
-    (@tcPerson@@tc,@ Bool) :: @|\pause@@dk*@@|\pause@
-    (@tc,@) @tcPerson@ :: @|\pause@@dk*@ -> @dk*@@|\pause@
-    (@tc,@) :: @|\pause@@dk*@ -> @dk*@ -> @dk*@@|\pause@
-    Either String @tcEarning@ :: @|\pause@@dk*@@|\pause@
-    Either String :: @|\pause@@dk*@ -> @dk*@@|\pause@
-    Either :: @|\pause@@dk*@ -> @dk*@ -> @dk*@
+    (@tcPerson@@tc,@ Bool) :: @dk*@
+    (@tc,@) @tcPerson@ :: @dk*@ -> @dk*@
+    (@tc,@) :: @dk*@ -> @dk*@ -> @dk*@
+    Either String @tcEarning@ :: @dk*@
+    Either String :: @dk*@ -> @dk*@
+    Either :: @dk*@ -> @dk*@ -> @dk*@
   \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Introducing Constraint}
   \texttt{Haskell} has \texttt{typeclasses} that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this \hclass{Typeclass} \texttt{instance} can be used to provide \texttt{contexts} for functions.
-  \pause
   \begin{lstlisting}[style=hask]
-    Show -- types that can be serialized to String@|\pause@
-    Eq   -- types that can be compared for equality@|\pause@
-    Ord  -- types that can be ordered@|\pause@
+    Show -- types that can be serialized to String
+    Eq   -- types that can be compared for equality
+    Ord  -- types that can be ordered
     Num  -- types that are like numbers: +, -, *, @|\ldots@
          -- and many others
   \end{lstlisting}
@@ -1191,7 +1109,6 @@
     sequenceA :: (Applicative f@tc,@ Traversable t) => t (f a) -> f (t a)
   \end{lstlisting}
 
-  \pause
   A loose translation with \texttt{:} for \texttt{implements}:
   \begin{lstlisting}[style=hask]
     enum Ordering { LT, EQ, GT }
@@ -1212,7 +1129,6 @@
     Ord  :: @dk*@ -> Constraint
     Num  :: @dk*@ -> Constraint
 
-    @|\pause@
     {-# LANGUAGE ConstraintKinds #-}
 
     type @ccShowContext@ a b = (Show a@tc,@ Show b)
@@ -1220,7 +1136,6 @@
     sameSerialization :: @ccShowContext@ a b => a -> b -> Bool
     sameSerialization a b = show a == show b
 
-    @|\pause@
     @ccShowContext@ :: @dk*@ -> @dk*@ -> Constraint
   \end{lstlisting}
 \end{frame}
@@ -1253,7 +1168,6 @@
 
 \begin{frame}[fragile]{Language Extensions}
   Compiler extensions that enable a variety of new functionalities:
-  \pause
   \begin{itemize}
     \item Syntax extension
     \item Type-level programming
@@ -1264,7 +1178,6 @@
   \end{itemize}
 
   \ \\
-  \pause
   Each extension has a name, and is enabled with the LANGUAGE pragma.
 \end{frame}
 
@@ -1276,7 +1189,6 @@
     data List a = Nil | Cons a (List a)
   \end{lstlisting}
 
-  \pause
   Becomes:
   \begin{lstlisting}[style=hask]
     {-# LANGUAGE GADTs #-}
@@ -1344,11 +1256,9 @@
   \hkind{Kinds} are built-in; no user defined \hkind{Kinds}.
 
   \ \\
-  \pause
   Want \hvalcon{Values} at the \htycon{Type} level though!
 
   \ \\
-  \pause
   => \texttt{Data kind promotion} :)
 \end{frame}
 
@@ -1434,7 +1344,6 @@
   \texttt{Type families} - type level functions, computed and checked at compile time.
 
   \ \\
-  \pause
   Comes in 2 flavors:
   \begin{itemize}
     \item type synonym families
@@ -1442,7 +1351,6 @@
   \end{itemize}
 
   \ \\
-  \pause
   and have a few options:
   \begin{itemize}
     \item associated vs. unassociated
@@ -1515,7 +1423,6 @@
   Assume \texttt{LANGUAGE extensions} are turned on from now on.
 
   \ \\
-  \pause
   Bad news, no more translations :(
 \end{frame}
 
@@ -1523,7 +1430,6 @@
   Like \htycon{List}, but also indexed by \hkind{Nat} to indicate length.
 
   \ \\
-  \pause
   \htycon{List}:
   \begin{lstlisting}[style=hask]
     data List a where
@@ -1531,7 +1437,6 @@
       Cons :: a -> List a -> List a
   \end{lstlisting}
 
-  \pause
   \htycon{Vector}:
   \begin{lstlisting}[style=hask]
     -- 'Z @|$\sim$@ 0
@@ -1603,7 +1508,6 @@
     append (x@vc:@xs) ys = x @vc:@ append xs ys
   \end{lstlisting}
 
-  \pause
   With \htycon{Vector}:
   \begin{lstlisting}[style=hask]
     vappend :: Vect n a -> Vect m a -> Vect (n @tf:+@ m) a
@@ -1620,7 +1524,6 @@
     map f (x@vc:@xs) = f x @vc:@ map f xs
   \end{lstlisting}
 
-  \pause
   With \htycon{Vector}:
   \begin{lstlisting}[style=hask]
     vmap :: (a -> b) -> Vect n a -> Vect n b
@@ -1637,7 +1540,6 @@
     zip xs     ys     = @vc[]@
   \end{lstlisting}
 
-  \pause
   With \htycon{Vector}:
   \begin{lstlisting}[style=hask]
     vzip :: Vect n a -> Vect n b -> Vect n (a@tc,@ b)
@@ -1786,7 +1688,6 @@
         \item disallow partial functions
         \item distinction between \hkeyword{data} and \hkeyword{codata}
       \end{itemize}
-    \pause
     \item Proof assistant languages
       \begin{itemize}
         \item Ph.D. first please
