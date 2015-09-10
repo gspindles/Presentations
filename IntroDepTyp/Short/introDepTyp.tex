@@ -232,7 +232,7 @@
   \begin{lstlisting}[style=hask]
     enum Vect<@dkNat@ n, A> {
       Vect<@vc0@, A> VNil,
-      Vect<n @tf+@ @vc1@, A> VCons(A a, Vect<n, A> va)
+      Vect<n @tf'+@ @vc1@, A> VCons(A a, Vect<n, A> va)
     }
 
     Vect<@vc6@, Int> vs = VCons(@vc4@, VCons(@vc8@, VCons(@vc15@, VCons(@vc16@, VCons(@vc23@, VCons(@vc42@, VNil))))));
@@ -397,28 +397,6 @@
 \begin{frame}[fragile]{Parametrization}
   Types can parametrize over another type:
   \begin{lstlisting}[style=hask]
-    data @tcId@ a = @vcId@ a
-
-    intIdwrtSum :: @tcId@ Int
-    intIdwrtSum = @vcId@ @vc0@
-  \end{lstlisting}
-
-  With:
-  \begin{lstlisting}[style=hask]
-    @vcId@ :: a -> @tcId@ a
-  \end{lstlisting}
-
-  A loose translation:
-  \begin{lstlisting}[style=hask]
-    enum @tcId@<A> {
-      @vcId@(A a)
-    }
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Tuple}
-  Parametrize over 2 types - 2-tuple!
-  \begin{lstlisting}[style=hask]
     data @tcTuple@ a b = @vcTuple@ a b
   \end{lstlisting}
 
@@ -489,47 +467,6 @@
     barbara2 = (@vcPerson@ "Barbara" "Smith" @vc30,@ Just "dancer")
     chet2    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@ Nothing)
     luffy2   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@ Just "pirate")
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Either}
-  Like \htycon{Bool}, but parametrizes over both \hvalcon{True} and \hvalcon{False}:
-  \begin{lstlisting}[style=hask]
-    data Either a b = Left a | Right b
-  \end{lstlisting}
-
-  With:
-  \begin{lstlisting}[style=hask]
-    Left  :: a -> Either a b
-    Right :: b -> Either a b
-  \end{lstlisting}
-
-  A loose translation:
-  \begin{lstlisting}[style=hask]
-    enum Either<A, B> {
-      Left(A a),
-      Right(B b)
-    }
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Either}
-  From previous slide:
-  \begin{lstlisting}[style=hask]
-    data Either a b = Left a | Right b
-  \end{lstlisting}
-
-  Refine with \htycon{Earning}:
-  \begin{lstlisting}[style=hask]
-    type @tcEarning@ = Either String Int
-
-    barbara3, chet3, luffy3 :: (@tcPerson@@tc,@ @tcEarning@)
-    barbara3 = (@vcPerson@ "Barbara" "Smith" @vc30,@
-               Right @vc100000@)
-    chet3    = (@vcPerson@ "Chet" "Awesome-Laser" @vc2,@
-               Left "Is a baby") 
-    luffy3   = (@vcPerson@ "Luffy D." "Monkey" @vc19,@
-               Right @vc2000000@)
   \end{lstlisting}
 \end{frame}
 
@@ -690,51 +627,24 @@
   \end{lstlisting}
 \end{frame}
 
-%\begin{frame}[fragile]{Type of Functions}
-%  Q: Actual type of functions?\\
-%  A: Built-in magic, it's called the $function\ arrow$, something like:
-%  \begin{lstlisting}[style=hask]
-%    data (->) a b = implementation
-%
-%    even  :: Int @tc->@ Bool
-%    toInt :: @tcNat@ @tc->@ Int
-%  \end{lstlisting}
-%\end{frame}
-
-\begin{frame}[fragile]{Functions with Parametric Polymorphism}
-  Functions can be parametric:
-  \begin{lstlisting}[style=hask]
-    id :: a -> a
-    id x = x
-  \end{lstlisting}
-
-  Not as loose translation:
-  \begin{lstlisting}[style=hask]
-    A id<A>(A a) {
-      return a;
-    }
-  \end{lstlisting}
-\end{frame}
-
 \begin{frame}[fragile]{Functions with Parametric Polymorphism}
   Functions can be parametric:
   \begin{lstlisting}[style=hask]
     data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @tc[@a@tc]@
 
-    append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
-    append @vc[]@     ys = ys
-    append (x@vc:@xs) ys = x @vc:@ append xs ys
+    length :: @tc[@a@tc]@ -> Int
+    length @vc[]@     = @vc0@
+    length (x@vc:@xs) = 1 + length xs
   \end{lstlisting}
 
   A translation:
   \begin{lstlisting}[style=hask]
-    List<A> append(List<A> l1, List<A> l2) {
+    Int length(List<A> ls) {
       switch l1:
         case Nil:
-          return l2;
+          return @vc0@;
         case Cons(x, xs):
-          List<A> rest = append(xs, l2);
-          return Cons(x, rest);
+          return @vc1@ + length(xs);
     }
   \end{lstlisting}
 \end{frame}
@@ -744,23 +654,24 @@
   \begin{lstlisting}[style=hask]
     data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @tc[@a@tc]@
 
-    append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
-    append @vc[]@     ys = ys
-    append (x@vc:@xs) ys = x @vc:@ append xs ys
+    length :: @tc[@a@tc]@ -> Int
+    length @vc[]@     = @vc0@
+    length (x@vc:@xs) = 1 + length xs
   \end{lstlisting}
 
   Evaluation is a series of substitutions:
   \begin{lstlisting}[style=hask]
-    xs = @vc[@@vc4@, @vc8@@vc]@ = @vc4@ @vc:@ @vc8@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
-    ys = @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@ = @vc15@ @vc:@ @vc16@ @vc:@ @vc23@ @vc:@ @vc42@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
+    xs = @vc[@@vc4@, @vc8@@vc@, @vc15@@vc]@ = @vc4@ @vc:@ @vc8@ @vc:@ @vc15@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
 
-      append xs ys :: @tc[@Int@tc]@
-    = append @vc[4, 8]@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ append @vc[8]@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ @vc8@ @vc:@ append @vc[]@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ @vc8@ @vc:@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ @vc[8, 15, 16, 23, 42]@
-    = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
+      length xs :: Int
+    = length @vc[@@vc4@, @vc8@, @vc15@@vc]@
+    = @vc1@ + length @vc[@@vc8@, @vc15@@vc]@
+    = @vc1@ + @vc1@ + length @vc[@@vc15@@vc]@
+    = @vc1@ + @vc1@ + @vc1@ + length @vc[]@
+    = @vc1@ + @vc1@ + @vc1@ + @vc0@
+    = @vc1@ + @vc1@ + @vc1@
+    = @vc1@ + @vc2@
+    = @vc3@
   \end{lstlisting}
 \end{frame}
 
@@ -785,106 +696,6 @@
     Func<A, C> compose(Func<B, C> f, Func<A, B> g) {
       return x => f(g(x));
     }
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{More Functions Examples}
-  $map$:
-  \begin{lstlisting}[style=hask]
-    map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
-    map f @vc[]@     = @vc[]@
-    map f (x@vc:@xs) = f x @vc:@ map f xs
-  \end{lstlisting}
-
-  A translation:
-  \begin{lstlisting}[style=hask]
-    List<B> map(Func<A, B> f, List<A> la) {
-      switch la:
-        case Nil:
-          return Nil;
-        case Cons(a, as):
-          B b = f(a)
-          List<B> rest = map(f, as);
-          return Cons(b, rest);
-    }
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{More Functions Examples}
-  $map$:
-  \begin{lstlisting}[style=hask]
-    map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
-    map f @vc[]@     = @vc[]@
-    map f (x@vc:@xs) = f x @vc:@ map f xs
-  \end{lstlisting}
-
-  Evaluation is a series of substitutions:
-  \begin{lstlisting}[style=hask]
-  xs = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@ :: @tc[@Int@tc]@
-  even :: Int -> Bool
-
-    map even xs :: @tc[@Bool@tc]@
-  = map even @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
-  = even @vc4@ @vc:@ map even @vc[@@vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
-  = True @vc:@ even @vc8@ @vc:@ map even @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
-  = True @vc:@ True @vc:@ even @vc15@ @vc:@ map even @vc[@@vc16@, @vc23@, @vc42@@vc]@
-  = True @vc:@ True @vc:@ False @vc:@ even @vc16@ @vc:@ map even @vc[@@vc23@, @vc42@@vc]@
-  = True @vc:@ True @vc:@ False @vc:@ True @vc:@ even @vc23@ @vc:@ map even @vc[@@vc42@@vc]@
-  = True @vc:@ True @vc:@ False @vc:@ True @vc:@ False @vc:@ even @vc24@ @vc:@ map even @vc[]@
-  = True @vc:@ True @vc:@ False @vc:@ True @vc:@ False @vc:@ True @vc:@ @vc[]@
-  = @vc[@True, True, False, True, False, True@vc]@
-
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{More Functions Examples}
-  $zip$:
-  \begin{lstlisting}[style=hask]
-    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[@(a@tc,@b)@tc]@
-    zip @vc[]@     ys     = @vc[]@
-    zip xs     @vc[]@     = @vc[]@
-    zip (x@vc:@xs) (y@vc:@ys) = (x@vc,@y) @vc:@ zip xs ys
-  \end{lstlisting}
-
-  A translation:
-  \begin{lstlisting}[style=hask]
-    List<@tcTuple@<A, B>> zip(List<A> l1, List<B> l2) {
-      switch l1:
-        case Nil:
-          return Nil;
-        case Cons(a, as):
-          switch l2:
-            case Nil:
-              return Nil;
-            case Cons(b, bs):
-              @tcTuple@<A, B> front = @vcTuple@(a, b);
-              List<@tcTuple@<A, B>> rest = zip(as, bs);
-              return Cons(front, rest);
-    }
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{More Functions Examples}
-  $zip$:
-  \begin{lstlisting}[style=hask]
-    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[@(a@tc,@b)@tc]@
-    zip @vc[]@     ys     = @vc[]@
-    zip xs     @vc[]@     = @vc[]@
-    zip (x@vc:@xs) (y@vc:@ys) = (x@vc,@y) @vc:@ zip xs ys
-  \end{lstlisting}
-
-  Evaluation is a series of substitutions:
-  \begin{lstlisting}[style=hask]
-    xs = @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ :: @tc[@Char@tc]@
-    ys = @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@ :: @tc[@Int@tc]@
-
-      zip xs ys :: @tc[@(Char@tc,@ Int)@tc]@
-    = zip @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@
-    = (@str'a'@@vc,@ @vc1@) @vc:@ zip @vc[@@str'b'@, @str'c'@@vc]@ @vc[@@vc2@, @vc3@, @vc4@@vc]@
-    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ zip @vc[@@str'c'@@vc]@ @vc[@@vc3@, @vc4@@vc]@
-    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ (@str'c'@@vc,@ @vc3@) @vc:@ zip @vc[]@ @vc[@@vc4@@vc]@
-    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ (@str'c'@@vc,@ @vc3@) @vc:@ @vc[]@
-    = @vc[@(@str'a'@@vc,@ @vc1@), (@str'b'@@vc,@ @vc2@), (@str'c'@@vc,@ @vc3@)@vc]@
   \end{lstlisting}
 \end{frame}
 
@@ -981,10 +792,8 @@
   \ \\
   => \hvalcon{Values} on RHS depends on the \htycon{Type} on LHS
   \ \\
-  \pause
   => \hvalcon{Values} depending on \htycon{Types}
   \ \\
-  \pause
   => \texttt{Parametric polymorphism} of $\lambda2$
 
 %  \ \\
@@ -996,8 +805,10 @@
   \begin{itemize}
     \item \hvalcon{Values} depending on \hvalcon{Values}: \texttt{$\lambda$-calculus}
     \item \hvalcon{Values} depending on \htycon{Types}: $\lambda2$, \texttt{System F}
+    \pause
     \item \htycon{Types} depending on \htycon{Types}: $\lambda\underline\omega$\\
       => \texttt{Type-level programming} via \texttt{type operators}
+    \pause
     \item \htycon{Types} depending on \hvalcon{Values}: $\lambda\Pi$\\
       => \texttt{Dependent types}
   \end{itemize}
@@ -1059,7 +870,6 @@
     data @tc[@a@tc]@ = Nil | (@vc:@) a @vc[@a@vc]@
     data Maybe a = Nothing | Just a
     data (a@tc,@ b) = (a@vc,@ b)
-    data Either a b = Left a | Right b
 
     Int :: @dk*@
     Bool :: @dk*@
@@ -1067,84 +877,14 @@
     @tc[]@ :: @dk*@ -> @dk*@
     Maybe @tcPerson@ :: @dk*@
     Maybe :: @dk*@ -> @dk*@
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Introducing $\star$}
-  \begin{lstlisting}[style=hask]
-    -- built-in magic: infinitely many value constructors
-    data Int = @|\ldots@ | @vc-1@ | @vc0@ | @vc1@ | @vc2@ | @|\ldots@
-    data Bool = False | True
-    data @tc[@a@tc]@ = Nil | (@vc:@) a @vc[@a@vc]@
-    data Maybe a = Nothing | Just a
-    data (a@tc,@ b) = (a@vc,@ b)
-    data Either a b = Left a | Right b
-
     (@tcPerson@@tc,@ Bool) :: @dk*@
     (@tc,@) @tcPerson@ :: @dk*@ -> @dk*@
     (@tc,@) :: @dk*@ -> @dk*@ -> @dk*@
-    Either String @tcEarning@ :: @dk*@
-    Either String :: @dk*@ -> @dk*@
-    Either :: @dk*@ -> @dk*@ -> @dk*@
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Introducing Constraint}
-  \texttt{Haskell} has \texttt{typeclasses} that very loosely resemble interfaces in OOP. A basic \hclass{Typeclass} consists of a collection of function signatures for a \htycon{Type} to implement. Afterward, this \hclass{Typeclass} \texttt{instance} can be used to provide \texttt{contexts} for functions.
-  \begin{lstlisting}[style=hask]
-    Show -- types that can be serialized to String
-    Eq   -- types that can be compared for equality
-    Ord  -- types that can be ordered
-    Num  -- types that are like numbers: +, -, *, @|\ldots@
-         -- and many others
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Introducing Constraint}
-  An example:
-  \begin{lstlisting}[style=hask]
-    data Ordering = LT | EQ | GT
-
-    show      :: Show a => a -> String  -- toString()
-    (==)      :: Eq a => a -> a -> Bool
-    compare   :: Ord a => a -> a -> Ordering
-    (+)       :: Num a => a -> a -> a
-    sequenceA :: (Applicative f@tc,@ Traversable t) => t (f a) -> f (t a)
-  \end{lstlisting}
-
-  A loose translation with \texttt{:} for \texttt{implements}:
-  \begin{lstlisting}[style=hask]
-    enum Ordering { LT, EQ, GT }
-
-    String show<A>(A a) where A : Show
-    Bool equal<A>(A a, A a) where A : Eq
-    Ordering compare<A>(A a, A a) where A : Ord
-    A plus<A>(A a, A a) where A : Num
-    F<T<_>> sequenceA<F,T>(T<F<_>> tfa) where F : Applicative, T : Traversable
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Introducing Constraint}
-  These \hclass{Typeclass} \texttt{contexts} have \hkind{Kind} \hkind{Constraint}.
-  \begin{lstlisting}[style=hask]
-    Show :: @dk*@ -> Constraint
-    Eq   :: @dk*@ -> Constraint
-    Ord  :: @dk*@ -> Constraint
-    Num  :: @dk*@ -> Constraint
-
-    {-# LANGUAGE ConstraintKinds #-}
-
-    type @ccShowContext@ a b = (Show a@tc,@ Show b)
-
-    sameSerialization :: @ccShowContext@ a b => a -> b -> Bool
-    sameSerialization a b = show a == show b
-
-    @ccShowContext@ :: @dk*@ -> @dk*@ -> Constraint
   \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Other Kinds}
-  There are other \hkind{Kinds} aside from \hkind{*} and \hkind{Constraint}
+  There are other \hkind{Kinds} aside from \hkind{*}:
   \begin{lstlisting}[style=hask]
     import GHC.Prim
     
@@ -1299,50 +1039,6 @@
   \end{tabular}
 \end{frame}
 
-\begin{frame}[fragile]{Example}
-  Example with GADTs:
-  \begin{lstlisting}[style=hask]
-    {-# LANGUAGE DataKinds #-}
-    {-# LANGUAGE GADTs #-}
-    {-# LANGUAGE KindSignatures #-}
-
-    data Bool = False | True
-
-    data @tcTextInput@ (a :: Bool) where
-      @vcRawText@  :: String -> @tcTextInput@ @tc'@False
-      @vcSafeText@ :: String -> @tcTextInput@ @tc'@True
-
-    sanitize :: @tcTextInput@ a -> @tcTextInput@ @tc'@True
-    sanitize (@vcRawText@ str)  = @vcSafeText@ (htmlEncode str)
-    sanitize x              = x
-  \end{lstlisting}
-  \scriptsize{Notice that the $a$ here is \texttt{phantom}.}
-\end{frame}
-
-\begin{frame}[fragile]{Example}
-  Translation\textsuperscript{*}:
-  \begin{lstlisting}[style=hask]
-    enum Bool {
-      Bool False,
-      Bool True
-    }
-
-    enum @tcTextInput@<Bool b> {
-      @tcTextInput@<@tc'@False> @vcRawText@(String str),
-      @tcTextInput@<@tc'@True> @vcSafeText@(String str)
-    }
-
-    @tcTextInput@<@tc'@True> sanitize(@tcTextInput@<B> input) {
-      switch input:
-        case @vcRawText@(input):
-          return @vcSafeText@(htmlEncode(input));
-        default:
-          return input;
-    }
-  \end{lstlisting}
-  \textit{\tiny{(*) supreme looseness and totally made-up syntax!!!}}
-\end{frame}
-
 \begin{frame}[fragile]{Type Families}
   \texttt{Type families} - type level functions, computed and checked at compile time.
 
@@ -1422,15 +1118,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Dependent Type Programming with Vectors}
 
-\begin{frame}[fragile]{Extended Haskell}
-  Assume \texttt{LANGUAGE extensions} are turned on from now on.
-
-  \ \\
-  Bad news, no more translations :(
-\end{frame}
-
 \begin{frame}[fragile]{Vectors}
-  Like \htycon{List}, but also indexed by \hkind{Nat} to indicate length.
+  Like \htycon{List}, but also \textit{indexed} by \hkind{Nat} to indicate length.
 
   \ \\
   \htycon{List}:
@@ -1506,6 +1195,31 @@
 \begin{frame}[fragile]{Append}
   \texttt{append} concatenates 2 \htycon{Lists}:
   \begin{lstlisting}[style=hask]
+    data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @tc[@a@tc]@
+
+    append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
+    append @vc[]@     ys = ys
+    append (x@vc:@xs) ys = x @vc:@ append xs ys
+  \end{lstlisting}
+
+  Evaluation is a series of substitutions:
+  \begin{lstlisting}[style=hask]
+    xs = @vc[@@vc4@, @vc8@@vc]@ = @vc4@ @vc:@ @vc8@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
+    ys = @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@ = @vc15@ @vc:@ @vc16@ @vc:@ @vc23@ @vc:@ @vc42@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
+
+      append xs ys :: @tc[@Int@tc]@
+    = append @vc[@@vc4@, @vc8@@vc]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ append @vc[@@vc8@@vc]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ @vc8@ @vc:@ append @vc[]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ @vc8@ @vc:@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ @vc[@@vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Append}
+  \texttt{append} concatenates 2 \htycon{Lists}:
+  \begin{lstlisting}[style=hask]
     append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
     append @vc[]@     ys = ys
     append (x@vc:@xs) ys = x @vc:@ append xs ys
@@ -1516,6 +1230,30 @@
     vappend :: Vect n a -> Vect m a -> Vect (n @tf'+@ m) a
     vappend VNil    ys = ys
     vappend (x@vc:>@xs) ys = x @vc:>@ vappend xs ys
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Map}
+  $map$:
+  \begin{lstlisting}[style=hask]
+    map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
+    map f @vc[]@     = @vc[]@
+    map f (x@vc:@xs) = f x @vc:@ map f xs
+  \end{lstlisting}
+
+  Evaluation is a series of substitutions:
+  \begin{lstlisting}[style=hask]
+    xs = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@ :: @tc[@Int@tc]@
+    even :: Int -> Bool
+
+      map even xs :: @tc[@Bool@tc]@
+    = map even @vc[@@vc4@, @vc8@, @vc15@, @vc16@@vc]@
+    = even @vc4@ @vc:@ map even @vc[@@vc8@, @vc15@, @vc16@@vc]@
+    = True @vc:@ even @vc8@ @vc:@ map even @vc[@@vc15@, @vc16@@vc]@
+    = True @vc:@ True @vc:@ even @vc15@ @vc:@ map even @vc[@@vc16@@vc]@
+    = True @vc:@ True @vc:@ False @vc:@ even @vc16@ @vc:@ map even @vc[]@
+    = True @vc:@ True @vc:@ False @vc:@ True @vc:@ @vc[]@
+    = @vc[@True, True, False, True@vc]@
   \end{lstlisting}
 \end{frame}
 
@@ -1536,6 +1274,30 @@
 \end{frame}
 
 \begin{frame}[fragile]{Zip}
+  $zip$:
+  \begin{lstlisting}[style=hask]
+    zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[@(a@tc,@b)@tc]@
+    zip @vc[]@     ys     = @vc[]@
+    zip xs     @vc[]@     = @vc[]@
+    zip (x@vc:@xs) (y@vc:@ys) = (x@vc,@y) @vc:@ zip xs ys
+  \end{lstlisting}
+
+  Evaluation is a series of substitutions:
+  \begin{lstlisting}[style=hask]
+    xs = @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ :: @tc[@Char@tc]@
+    ys = @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@ :: @tc[@Int@tc]@
+
+      zip xs ys :: @tc[@(Char@tc,@ Int)@tc]@
+    = zip @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ zip @vc[@@str'b'@, @str'c'@@vc]@ @vc[@@vc2@, @vc3@, @vc4@@vc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ zip @vc[@@str'c'@@vc]@ @vc[@@vc3@, @vc4@@vc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ (@str'c'@@vc,@ @vc3@) @vc:@ zip @vc[]@ @vc[@@vc4@@vc]@
+    = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ (@str'c'@@vc,@ @vc3@) @vc:@ @vc[]@
+    = @vc[@(@str'a'@@vc,@ @vc1@), (@str'b'@@vc,@ @vc2@), (@str'c'@@vc,@ @vc3@)@vc]@
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Zip}
   \texttt{zip} creates pair-wise tuples:
   \begin{lstlisting}[style=hask]
     zip :: @tc[@a@tc]@ -> @tc[@b@tc]@ -> @tc[@(a@tc,@b)@tc]@
@@ -1551,7 +1313,7 @@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{zip}
+\begin{frame}[fragile]{Zip}
   \texttt{zip2} with \htyfam{Min} type family:
   \begin{lstlisting}[style=hask]
     type family Min n m where
@@ -1565,6 +1327,78 @@
     vzip2 VNil    ys      = VNil
   \end{lstlisting}
 \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Pi and Sigma Types}
+
+\begin{frame}[fragile]{Replicate}
+  \texttt{replicate} repeats an element n times:
+  \begin{lstlisting}[style=hask]
+    replicate :: Int -> a -> @tc[@a@tc]@
+    replicate @vc0@ x = @vc[]@
+    replicate n x = x @vc:@ replicate (n - @vc1@) x
+  \end{lstlisting}
+
+  \ \\
+  For \htycon{Vector}, we want its \htycon{Type} \htycon{Vector} $n$ $a$ to reflect the \hvalcon{Value} of the first parameter \htycon{Int}.
+\end{frame}
+
+\begin{frame}[fragile]{Pi Types}
+  \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures. Fake by deriving \texttt{singleton instances} of \htyfam{Sing} data family to reflect values to the type level.
+  \begin{lstlisting}[style=hask]
+    -- fake with singleton types
+    data instance Sing (n :: @dkNat@) where
+      @vcSZ@ :: Sing @vcZ@
+      @vcSS@ :: Sing n -> Sing (@vcS@ n)
+
+    -- so we have
+    @vcSZ@ :: Sing @vcZ@
+    @vcSS@ @vcSZ@ :: Sing (@vcS@ @vcZ@)
+    @vcSS@ (@vcSS@ @vcSZ@) :: Sing (@vcS@ (@vcS@ @vcZ@))
+
+    @|\pause@-- finally:
+    vreplicate :: Sing (n :: @dkNat@) -> a -> Vect n a
+    vreplicate @vcSZ@     a = @vcVNil@
+    vreplicate (@vcSS@ n) a = a @vc:>@ vreplicate n a
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Filter}
+  \texttt{filter} selects elements from a list for given predicate:
+  \begin{lstlisting}[style=hask]
+    filter :: (a -> Bool) -> @tc[@a@tc]@ -> @tc[@a@tc]@
+    filter f @vc[]@     = @vc[]@
+    filter f (x@vc:@xs) = if f x
+                      then x @vc:@ filter f xs
+                      else filter f xs
+  \end{lstlisting}
+
+  \ \\
+  We do not the number of elements for which the predicate will return \hvalcon{True}, but \htycon{Vector} depends on this number in its \htycon{Type}.
+\end{frame}
+
+\begin{frame}[fragile]{Sigma Types}
+  \texttt{$\Sigma$-types} - tuple where 2\textsuperscript{nd} value depends on 1\textsuperscript{st}:
+  \begin{lstlisting}[style=hask]
+    -- using Idris's ** dependent pair syntax
+       (@vc3@ @vc**@ @str'a'@ @vc:>@ @str'b'@ @vc:>@ @str'c'@ @vc:>@ @vcVNil@)
+    :: (n :: @dkNat@ @tc**@ @tcVect@ n @tcChar@)
+
+    vfilter :: (a -> Bool) -> Vect n a
+            -> (p :: @dkNat@ @tc**@ Vect p a)
+  \end{lstlisting}
+
+  \pause
+  Credit to Ertugrul S\"oylemez: 
+  \begin{lstlisting}[style=hask]
+    -- Sugar ** for Sigma type constructor and Exists value constructor
+    data @tcSigma@ :: @dkKProxy@ a -> (a -> @dk*@) -> @dk*@ where
+      (@vcExists@ :: @tfSing@ (x :: a) -> b x
+           -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
+  \end{lstlisting}
+\end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Heterogeneous Collections}
@@ -1608,71 +1442,6 @@
 %  \end{lstlisting}
 %  \textit{\tiny{(*) supreme looseness and totally made-up syntax!!!}}
 %\end{frame}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Pi and Sigma Types}
-
-\begin{frame}[fragile]{Replicate and Filter}
-  \texttt{replicate} repeats an element n times:
-  \begin{lstlisting}[style=hask]
-    replicate :: Int -> a -> @tc[@a@tc]@
-    replicate @vc0@ x = @vc[]@
-    replicate n x = x @vc:@ replicate (n - @vc1@) x
-  \end{lstlisting}
-
-  \ \\
-  \pause
-  \texttt{filter} selects elements from a list for given predicate:
-  \begin{lstlisting}[style=hask]
-    filter :: (a -> Bool) -> @tc[@a@tc]@ -> @tc[@a@tc]@
-    filter f @vc[]@     = @vc[]@
-    filter f (x@vc:@xs) = if f x
-                      then x @vc:@ filter f xs
-                      else filter f xs
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Pi Types}
-  \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures. Fake by deriving \texttt{singleton instances} of \htyfam{Sing} data family to reflect values to the type level.
-  \begin{lstlisting}[style=hask]
-    -- fake with singleton types
-    data instance Sing (n :: @dkNat@) where
-      @vcSZ@ :: Sing @vcZ@
-      @vcSS@ :: Sing n -> Sing (@vcS@ n)
-
-    -- so we have
-    @vcSZ@ :: Sing @vcZ@
-    @vcSS@ @vcSZ@ :: Sing (@vcS@ @vcZ@)
-    @vcSS@ (@vcSS@ @vcSZ@) :: Sing (@vcS@ (@vcS@ @vcZ@))
-
-    @|\pause@-- finally:
-    vreplicate :: Sing (n :: @dkNat@) -> a -> Vect n a
-    vreplicate @vcSZ@     a = @vcVNil@
-    vreplicate (@vcSS@ n) a = a @vc:>@ vreplicate n a
-  \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{Sigma Types}
-  \texttt{$\Sigma$-types} - tuple where 2\textsuperscript{nd} value depends on 1\textsuperscript{st}:
-  \begin{lstlisting}[style=hask]
-    -- using Idris's ** dependent pair syntax
-       (@vc3@ @vc**@ @str'a'@ @vc:>@ @str'b'@ @vc:>@ @str'c'@ @vc:>@ @vcVNil@)
-    :: (n :: @dkNat@ @tc**@ @tcVect@ n @tcChar@)
-
-    vfilter :: (a -> Bool) -> Vect n a
-            -> (p :: @dkNat@ @tc**@ Vect p a)
-  \end{lstlisting}
-
-  \pause
-  Credit to Ertugrul S\"oylemez: 
-  \begin{lstlisting}[style=hask]
-    -- Sugar ** for Sigma type constructor and Exists value constructor
-    data @tcSigma@ :: @dkKProxy@ a -> (a -> @dk*@) -> @dk*@ where
-      (@vcExists@ :: @tfSing@ (x :: a) -> b x
-           -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
-  \end{lstlisting}
-\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

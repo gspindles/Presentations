@@ -232,7 +232,7 @@
   \begin{lstlisting}[style=hask]
     enum Vect<@dkNat@ n, A> {
       Vect<@vc0@, A> VNil,
-      Vect<n @tf+@ @vc1@, A> VCons(A a, Vect<n, A> va)
+      Vect<n @tf'+@ @vc1@, A> VCons(A a, Vect<n, A> va)
     }
 
     Vect<@vc6@, Int> vs = VCons(@vc4@, VCons(@vc8@, VCons(@vc15@, VCons(@vc16@, VCons(@vc23@, VCons(@vc42@, VNil))))));
@@ -721,6 +721,7 @@
   \begin{lstlisting}[style=hask]
     data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @tc[@a@tc]@
 
+    -- actual name is (++)
     append :: @tc[@a@tc]@ -> @tc[@a@tc]@ -> @tc[@a@tc]@
     append @vc[]@     ys = ys
     append (x@vc:@xs) ys = x @vc:@ append xs ys
@@ -755,11 +756,11 @@
     ys = @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@ = @vc15@ @vc:@ @vc16@ @vc:@ @vc23@ @vc:@ @vc42@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
 
       append xs ys :: @tc[@Int@tc]@
-    = append @vc[4, 8]@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ append @vc[8]@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ @vc8@ @vc:@ append @vc[]@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ @vc8@ @vc:@ @vc[15, 16, 23, 42]@
-    = @vc4@ @vc:@ @vc[8, 15, 16, 23, 42]@
+    = append @vc[@@vc4@, @vc8@@vc]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ append @vc[@@vc8@@vc]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ @vc8@ @vc:@ append @vc[]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ @vc8@ @vc:@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
+    = @vc4@ @vc:@ @vc[@@vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
     = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@
   \end{lstlisting}
 \end{frame}
@@ -981,10 +982,8 @@
   \ \\
   => \hvalcon{Values} on RHS depends on the \htycon{Type} on LHS
   \ \\
-  \pause
   => \hvalcon{Values} depending on \htycon{Types}
   \ \\
-  \pause
   => \texttt{Parametric polymorphism} of $\lambda2$
 
 %  \ \\
@@ -996,8 +995,10 @@
   \begin{itemize}
     \item \hvalcon{Values} depending on \hvalcon{Values}: \texttt{$\lambda$-calculus}
     \item \hvalcon{Values} depending on \htycon{Types}: $\lambda2$, \texttt{System F}
+    \pause
     \item \htycon{Types} depending on \htycon{Types}: $\lambda\underline\omega$\\
       => \texttt{Type-level programming} via \texttt{type operators}
+    \pause
     \item \htycon{Types} depending on \hvalcon{Values}: $\lambda\Pi$\\
       => \texttt{Dependent types}
   \end{itemize}
@@ -1551,7 +1552,7 @@
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{zip}
+\begin{frame}[fragile]{Zip}
   \texttt{zip2} with \htyfam{Min} type family:
   \begin{lstlisting}[style=hask]
     type family Min n m where
