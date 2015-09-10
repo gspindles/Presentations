@@ -909,8 +909,8 @@
 \end{frame}
 
 \begin{frame}[fragile]{$\lambda$-Calculus}
-  Q: Sure, but can we have more?\\
-  A: Yes, extend \texttt{$\lambda$-calculus} so we can have more forms of abstractions.
+  You: Sure...
+  Me: Ah, yes, we want to extend \texttt{$\lambda$-calculus} so we can have more forms of abstractions!
 
   \ \\
   \pause
@@ -966,6 +966,7 @@
   => \hvalcon{Values} on RHS depends on the \hvalcon{Values} on LHS
   \ \\
   => \hvalcon{Values} depending on \hvalcon{Values}
+  => Ordinary \texttt{$\lambda$-calculus}
 \end{frame}
 
 \begin{frame}[fragile]{Value and Type Interdependency}
@@ -980,9 +981,11 @@
   \ \\
   => \hvalcon{Values} on RHS depends on the \htycon{Type} on LHS
   \ \\
+  \pause
   => \hvalcon{Values} depending on \htycon{Types}
   \ \\
-  => \texttt{Parametric polymorphism} of $\lambda2$ again
+  \pause
+  => \texttt{Parametric polymorphism} of $\lambda2$
 
 %  \ \\
 %  \textit{\tiny{Are we seeing a pattern yet?}}
@@ -1011,7 +1014,7 @@
     \item \texttt{type-level programming} through:
       \begin{itemize}
         \item \texttt{type families}
-        \item \texttt{equalities} on \htycon{Types}
+        \item \texttt{equalities} and \texttt{coercions} on \htycon{Types}
       \end{itemize}
   \end{itemize}
 
@@ -1221,7 +1224,7 @@
       Bool True
     }
 
-    emum Maybe<A> {
+    enum Maybe<A> {
       Maybe<A> Nothing,
       Maybe<A> Just(A a)
     }
@@ -1404,13 +1407,13 @@
 
     data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
 
-    type family (@tf:+@) n m where
-      @tc'@@vcZ@     @tf:+@ m = m
-      (@tc'@@vcS@ n) @tf:+@ m = @tc'@@vcS@ (n @tf:+@ m)
+    type family (@tf'+@) n m where
+      @tc'@@vcZ@     @tf'+@ m = m
+      (@tc'@@vcS@ n) @tf'+@ m = @tc'@@vcS@ (n @tf'+@ m)
 
-       (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)
-    => @tc'@@vcS@ ((@tc'@@vcS@ @tc'@@vcZ@) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@))
-    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcZ@ @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)))
+       (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) @tf'+@ (@tc'@@vcS@ @tc'@@vcZ@)
+    => @tc'@@vcS@ ((@tc'@@vcS@ @tc'@@vcZ@) @tf'+@ (@tc'@@vcS@ @tc'@@vcZ@))
+    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcZ@ @tf'+@ (@tc'@@vcS@ @tc'@@vcZ@)))
     => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
   \end{lstlisting}
 \end{frame}
@@ -1440,7 +1443,7 @@
   \htycon{Vector}:
   \begin{lstlisting}[style=hask]
     -- 'Z @|$\sim$@ 0
-    -- 'S n @|$\sim$@ n :+ 1
+    -- 'S n @|$\sim$@ n '+ 1
     data Vect (n :: @dkNat@) a where
       VNil :: Vect @vcZ@ a
       (@vc:>@) :: a -> Vect n a -> Vect (@vcS@ n) a
@@ -1464,10 +1467,10 @@
   Module GHC.TypeLits provide \texttt{type-level literals}:
   \begin{lstlisting}[style=hask]
     -- 'Z @|$\sim$@ 0
-    -- 'S n @|$\sim$@ n :+ 1
+    -- 'S n @|$\sim$@ n '+ 1
     data Vect (n :: @dkNat@) a where
       VNil :: Vect @vc0@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
+      (@vc:>@) :: a -> Vect n a -> Vect (n @tf'+@ @vc1@) a
 
     vs :: Vect @vc6@ Int
     vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
@@ -1478,7 +1481,7 @@
   \texttt{head} returns the first element of the \htycon{List}:
   \begin{lstlisting}[style=hask]
     -- from standard library
-    -- useless unless knowing list is non-empty
+    -- useless unless we know the list is non-empty
     head :: @tc[@a@tc]@ -> a
     head @vc[]@     = error "empty list"
     head (x@vc:@xs) = x
@@ -1510,7 +1513,7 @@
 
   With \htycon{Vector}:
   \begin{lstlisting}[style=hask]
-    vappend :: Vect n a -> Vect m a -> Vect (n @tf:+@ m) a
+    vappend :: Vect n a -> Vect m a -> Vect (n @tf'+@ m) a
     vappend VNil    ys = ys
     vappend (x@vc:>@xs) ys = x @vc:>@ vappend xs ys
   \end{lstlisting}
@@ -1634,7 +1637,7 @@
   \texttt{$\Pi$-types} - \hvalcon{Values} in \htycon{Type} signatures. Fake by deriving \texttt{singleton instances} of \htyfam{Sing} data family to reflect values to the type level.
   \begin{lstlisting}[style=hask]
     -- fake with singleton types
-    data instance Sing (n :: @tcNat@) where
+    data instance Sing (n :: @dkNat@) where
       @vcSZ@ :: Sing @vcZ@
       @vcSS@ :: Sing n -> Sing (@vcS@ n)
 
@@ -1644,7 +1647,7 @@
     @vcSS@ (@vcSS@ @vcSZ@) :: Sing (@vcS@ (@vcS@ @vcZ@))
 
     @|\pause@-- finally:
-    vreplicate :: Sing (n :: @tcNat@) -> a -> Vect n a
+    vreplicate :: Sing (n :: @dkNat@) -> a -> Vect n a
     vreplicate @vcSZ@     a = @vcVNil@
     vreplicate (@vcSS@ n) a = a @vc:>@ vreplicate n a
   \end{lstlisting}
@@ -1654,19 +1657,19 @@
   \texttt{$\Sigma$-types} - tuple where 2\textsuperscript{nd} value depends on 1\textsuperscript{st}:
   \begin{lstlisting}[style=hask]
     -- using Idris's ** dependent pair syntax
-       (@vc3@ @vc**@ 'a' @vc:>@ 'b' @vc:>@ 'c' @vc:>@ @vcVNil@)
-    :: (n :: Nat @tc**@ @tcVect@ n @tcChar@)
+       (@vc3@ @vc**@ @str'a'@ @vc:>@ @str'b'@ @vc:>@ @str'c'@ @vc:>@ @vcVNil@)
+    :: (n :: @dkNat@ @tc**@ @tcVect@ n @tcChar@)
 
     vfilter :: (a -> Bool) -> Vect n a
             -> (p :: @dkNat@ @tc**@ Vect p a)
   \end{lstlisting}
 
-  \ \\
   \pause
   Credit to Ertugrul S\"oylemez: 
   \begin{lstlisting}[style=hask]
+    -- Sugar ** for Sigma type constructor and Exists value constructor
     data @tcSigma@ :: @dkKProxy@ a -> (a -> @dk*@) -> @dk*@ where
-      (@vc**@) :: @tfSing@ (x :: a) -> b x
+      (@vcExists@ :: @tfSing@ (x :: a) -> b x
            -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
   \end{lstlisting}
 \end{frame}
