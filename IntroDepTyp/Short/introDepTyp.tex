@@ -349,6 +349,7 @@
 \begin{frame}[fragile]{Multiple Value Constructor}
   You can do type aliasing with \hkeyword{type}:
   \begin{lstlisting}[style=hask]
+    type String = @tc[@Char@tc]@
     type @tcSide@ = Double
     type @tcRadius@ = Double
   \end{lstlisting}
@@ -634,13 +635,13 @@
 
     length :: @tc[@a@tc]@ -> Int
     length @vc[]@     = @vc0@
-    length (x@vc:@xs) = 1 + length xs
+    length (x@vc:@xs) = @vc1@ + length xs
   \end{lstlisting}
 
   A translation:
   \begin{lstlisting}[style=hask]
     Int length(List<A> ls) {
-      switch l1:
+      switch ls:
         case Nil:
           return @vc0@;
         case Cons(x, xs):
@@ -720,7 +721,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{$\lambda$-Calculus}
-  You: Sure...
+  You: Sure...\\
   Me: Ah, yes, we want to extend \texttt{$\lambda$-calculus} so we can have more forms of abstractions!
 
   \ \\
@@ -777,6 +778,7 @@
   => \hvalcon{Values} on RHS depends on the \hvalcon{Values} on LHS
   \ \\
   => \hvalcon{Values} depending on \hvalcon{Values}
+  \ \\
   => Ordinary \texttt{$\lambda$-calculus}
 \end{frame}
 
@@ -836,7 +838,7 @@
 \begin{frame}[fragile]{System F$_c$}
   Currently, \texttt{Haskell} as of GHC 7.10.2
   \begin{itemize}
-    \item not truely dependent either:
+    \item not fully dependent either:
       \begin{itemize}
         \item strong distinction between \hvalcon{Values} and \htycon{Types}
       \end{itemize}
@@ -878,7 +880,6 @@
     Maybe @tcPerson@ :: @dk*@
     Maybe :: @dk*@ -> @dk*@
     (@tcPerson@@tc,@ Bool) :: @dk*@
-    (@tc,@) @tcPerson@ :: @dk*@ -> @dk*@
     (@tc,@) :: @dk*@ -> @dk*@ -> @dk*@
   \end{lstlisting}
 \end{frame}
@@ -886,8 +887,6 @@
 \begin{frame}[fragile]{Other Kinds}
   There are other \hkind{Kinds} aside from \hkind{*}:
   \begin{lstlisting}[style=hask]
-    import GHC.Prim
-    
     (@dk*@)         -- kind of fully realized type
     (@dk#@)         -- kind of unboxed stuff used internally
     Constraint  -- kind of constraints and type equality
@@ -902,7 +901,7 @@
   All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2.
   
   \ \\
-  \textit{\tiny{All of this will be changed with the next GHC 8.0 release.}}
+  \textit{\tiny{All of this will be changed with the next GHC 8.0.1 release.}}
 \end{frame}
 
 
@@ -1052,7 +1051,7 @@
   \ \\
   and have a few options:
   \begin{itemize}
-    \item associated vs. unassociated
+    \item associated vs. standalone
     \item open vs. closed\textsuperscript{1}
     \item injectivity\textsuperscript{2}
   \end{itemize}
@@ -1287,7 +1286,7 @@
     xs = @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ :: @tc[@Char@tc]@
     ys = @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@ :: @tc[@Int@tc]@
 
-      zip xs ys :: @tc[@(Char@tc,@ Int)@tc]@
+      zip xs ys :: @tc[@@tc(@Char@tc,@ Int@tc)@@tc]@
     = zip @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ zip @vc[@@str'b'@, @str'c'@@vc]@ @vc[@@vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ zip @vc[@@str'c'@@vc]@ @vc[@@vc3@, @vc4@@vc]@
@@ -1375,7 +1374,7 @@
   \end{lstlisting}
 
   \ \\
-  We do not the number of elements for which the predicate will return \hvalcon{True}, but \htycon{Vector} depends on this number in its \htycon{Type}.
+  We do not know the number of elements for which the predicate will return \hvalcon{True}, but \htycon{Vector} depends on this number in its \htycon{Type}.
 \end{frame}
 
 \begin{frame}[fragile]{Sigma Types}
@@ -1383,7 +1382,7 @@
   \begin{lstlisting}[style=hask]
     -- using Idris's ** dependent pair syntax
        (@vc3@ @vc**@ @str'a'@ @vc:>@ @str'b'@ @vc:>@ @str'c'@ @vc:>@ @vcVNil@)
-    :: (n :: @dkNat@ @tc**@ @tcVect@ n @tcChar@)
+    :: (@vc3@ :: @dkNat@ @tc**@ @tcVect@ @vc3@ @tcChar@)
 
     vfilter :: (a -> Bool) -> Vect n a
             -> (p :: @dkNat@ @tc**@ Vect p a)
