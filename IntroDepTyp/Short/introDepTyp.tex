@@ -760,7 +760,7 @@
     map :: (a -> b) -> @tc[@a@tc]@ -> @tc[@b@tc]@
   \end{lstlisting}
 
-  The name for this extension is formally \texttt{second order $\lambda$-calculus}, aka \texttt{System F}, denoted by $\lambda2$,
+  The name for this extension is formally \texttt{second order $\lambda$-calculus}, aka \texttt{System F}, denoted by $\lambda2$.
 \end{frame}
 
 \begin{frame}[fragile]{Value and Type Interdependency}
@@ -1380,9 +1380,10 @@
 \begin{frame}[fragile]{Sigma Types}
   \texttt{$\Sigma$-types} - tuple where 2\textsuperscript{nd} value depends on 1\textsuperscript{st}:
   \begin{lstlisting}[style=hask]
-    -- using Idris's ** dependent pair syntax
-       (@vc3@ @vc**@ @str'a'@ @vc:>@ @str'b'@ @vc:>@ @str'c'@ @vc:>@ @vcVNil@)
-    :: (@vc3@ :: @dkNat@ @tc**@ @tcVect@ @vc3@ @tcChar@)
+    -- borrowing Idris's ** dependent pair syntax
+    -- n ~ S (S (S Z)) ~ 3, singleton version
+    dpair :: (n :: @dkNat@ @tc**@ @tcVect@ n @tcChar@)
+    dpair = (@vc3@ @vc**@ @str'a'@ @vc:>@ @str'b'@ @vc:>@ @str'c'@ @vc:>@ @vcVNil@)
 
     vfilter :: (a -> Bool) -> Vect n a
             -> (p :: @dkNat@ @tc**@ Vect p a)
