@@ -222,7 +222,7 @@
     infixr @vc5@ @vc:>@
     data Vect (n :: @dkNat@) a where
       VNil :: Vect @vc0@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (n @tf+@ @vc1@) a
+      (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
 
     vs :: Vect @vc6@ Int
     vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
@@ -232,7 +232,7 @@
   \begin{lstlisting}[style=hask]
     enum Vect<@dkNat@ n, A> {
       Vect<@vc0@, A> VNil,
-      Vect<n @tf'+@ @vc1@, A> VCons(A a, Vect<n, A> va)
+      Vect<n @tf:+@ @vc1@, A> VCons<A>(A a, Vect<n, A> va)
     }
 
     Vect<@vc6@, Int> vs = VCons(@vc4@, VCons(@vc8@, VCons(@vc15@, VCons(@vc16@, VCons(@vc23@, VCons(@vc42@, VNil))))));
@@ -431,7 +431,7 @@
   A loose translation:
   \begin{lstlisting}[style=hask]
     enum @tcTuple@<A, B> {
-      @vcTuple@(A a, B b)
+      @vcTuple@<A, B>(A a, B b)
     }
   \end{lstlisting}
 \end{frame}
@@ -471,7 +471,7 @@
   \begin{lstlisting}[style=hask]
     enum Maybe<A> {
       Nothing,
-      Just(A a)
+      Just<A>(A a)
     }
   \end{lstlisting}
 \end{frame}
@@ -586,7 +586,7 @@
   \begin{lstlisting}[style=hask]
     enum List<A> {
       Nil,
-      Cons(A a, List<A> as)
+      Cons<A>(A a, List<A> as)
     }
   \end{lstlisting}
 \end{frame}
@@ -635,7 +635,7 @@
         case n == @vc0@:
           return True;
         default:
-          if rem(n, @vc2@) == @vc0@
+          if rem(n, @vc2@) == @vc0@:
             return True;
           else
             return False;
@@ -1374,10 +1374,10 @@
     add @vcZ@     m = m
     add (@vcS@ n) m = @vcS@ (add n m)
 
-       add (@vcS@ (@vcS@ @vcZ@)) (@vcS@ @vcZ@)
-    => @vcS@ (add (@vcS@ @vcZ@) (@vcS@ @vcZ@))
-    => @vcS@ (@vcS@ (add @vcZ@ (@vcS@ @vcZ@)))
-    => @vcS@ (@vcS@ (@vcS@ @vcZ@))
+      add (@vcS@ (@vcS@ @vcZ@)) (@vcS@ @vcZ@)
+    = @vcS@ (add (@vcS@ @vcZ@) (@vcS@ @vcZ@))
+    = @vcS@ (@vcS@ (add @vcZ@ (@vcS@ @vcZ@)))
+    = @vcS@ (@vcS@ (@vcS@ @vcZ@))
   \end{lstlisting}
 \end{frame}
 
@@ -1393,10 +1393,10 @@
       @tfAdd@ @tc'@@vcZ@     m = m
       @tfAdd@ (@tc'@@vcS@ n) m = @tc'@@vcS@ (@tfAdd@ n m)
 
-       @tfAdd@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) (@tc'@@vcS@ @tc'@@vcZ@)
-    => @tc'@@vcS@ (@tfAdd@ (@tc'@@vcS@ @tc'@@vcZ@) (@tc'@@vcS@ @tc'@@vcZ@))
-    => @tc'@@vcS@ (@tc'@@vcS@ (@tfAdd@ @tc'@@vcZ@ (@tc'@@vcS@ @tc'@@vcZ@)))
-    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
+      @tfAdd@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) (@tc'@@vcS@ @tc'@@vcZ@)
+    = @tc'@@vcS@ (@tfAdd@ (@tc'@@vcS@ @tc'@@vcZ@) (@tc'@@vcS@ @tc'@@vcZ@))
+    = @tc'@@vcS@ (@tc'@@vcS@ (@tfAdd@ @tc'@@vcZ@ (@tc'@@vcS@ @tc'@@vcZ@)))
+    = @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
   \end{lstlisting}
 \end{frame}
 
@@ -1410,14 +1410,14 @@
 
     data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
 
-    type family (@tf'+@) n m where
-      @tc'@@vcZ@     @tf'+@ m = m
-      (@tc'@@vcS@ n) @tf'+@ m = @tc'@@vcS@ (n @tf'+@ m)
+    type family (@tf:+@) n m where
+      @tc'@@vcZ@     @tf:+@ m = m
+      (@tc'@@vcS@ n) @tf:+@ m = @tc'@@vcS@ (n @tf:+@ m)
 
-       (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) @tf'+@ (@tc'@@vcS@ @tc'@@vcZ@)
-    => @tc'@@vcS@ ((@tc'@@vcS@ @tc'@@vcZ@) @tf'+@ (@tc'@@vcS@ @tc'@@vcZ@))
-    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcZ@ @tf'+@ (@tc'@@vcS@ @tc'@@vcZ@)))
-    => @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
+      (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)
+    = @tc'@@vcS@ ((@tc'@@vcS@ @tc'@@vcZ@) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@))
+    = @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcZ@ @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)))
+    = @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
   \end{lstlisting}
 \end{frame}
 
@@ -1446,7 +1446,7 @@
   \htycon{Vector}:
   \begin{lstlisting}[style=hask]
     -- 'Z @|$\sim$@ 0
-    -- 'S n @|$\sim$@ n '+ 1
+    -- 'S n @|$\sim$@ n :+ 1
     data Vect (n :: @dkNat@) a where
       VNil :: Vect @vcZ@ a
       (@vc:>@) :: a -> Vect n a -> Vect (@vcS@ n) a
@@ -1470,10 +1470,10 @@
   Module GHC.TypeLits provide \texttt{type-level literals}:
   \begin{lstlisting}[style=hask]
     -- 'Z @|$\sim$@ 0
-    -- 'S n @|$\sim$@ n '+ 1
+    -- 'S n @|$\sim$@ n :+ 1
     data Vect (n :: @dkNat@) a where
       VNil :: Vect @vc0@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (n @tf'+@ @vc1@) a
+      (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
 
     vs :: Vect @vc6@ Int
     vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
@@ -1516,7 +1516,7 @@
 
   With \htycon{Vector}:
   \begin{lstlisting}[style=hask]
-    vappend :: Vect n a -> Vect m a -> Vect (n @tf'+@ m) a
+    vappend :: Vect n a -> Vect m a -> Vect (n @tf:+@ m) a
     vappend VNil    ys = ys
     vappend (x@vc:>@xs) ys = x @vc:>@ vappend xs ys
   \end{lstlisting}
