@@ -349,6 +349,7 @@
 \begin{frame}[fragile]{Multiple Value Constructor}
   You can do type aliasing with \hkeyword{type}:
   \begin{lstlisting}[style=hask]
+    type String = @tc[@Char@tc]@
     type @tcSide@ = Double
     type @tcRadius@ = Double
   \end{lstlisting}
@@ -879,7 +880,7 @@
     xs = @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ :: @tc[@Char@tc]@
     ys = @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@ :: @tc[@Int@tc]@
 
-      zip xs ys :: @tc[@(Char@tc,@ Int)@tc]@
+      zip xs ys :: @tc[@@tc(@Char@tc,@ Int@tc)@@tc]@
     = zip @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ zip @vc[@@str'b'@, @str'c'@@vc]@ @vc[@@vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ zip @vc[@@str'c'@@vc]@ @vc[@@vc3@, @vc4@@vc]@
@@ -910,7 +911,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{$\lambda$-Calculus}
-  You: Sure...
+  You: Sure...\\
   Me: Ah, yes, we want to extend \texttt{$\lambda$-calculus} so we can have more forms of abstractions!
 
   \ \\
@@ -967,6 +968,7 @@
   => \hvalcon{Values} on RHS depends on the \hvalcon{Values} on LHS
   \ \\
   => \hvalcon{Values} depending on \hvalcon{Values}
+  \ \\
   => Ordinary \texttt{$\lambda$-calculus}
 \end{frame}
 
@@ -1026,7 +1028,7 @@
 \begin{frame}[fragile]{System F$_c$}
   Currently, \texttt{Haskell} as of GHC 7.10.2
   \begin{itemize}
-    \item not truely dependent either:
+    \item not fully dependent either:
       \begin{itemize}
         \item strong distinction between \hvalcon{Values} and \htycon{Types}
       \end{itemize}
@@ -1163,7 +1165,7 @@
   All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2.
   
   \ \\
-  \textit{\tiny{All of this will be changed with the next GHC 8.0 release.}}
+  \textit{\tiny{All of this will be changed with the next GHC 8.0.1 release.}}
 \end{frame}
 
 
@@ -1357,7 +1359,7 @@
   \ \\
   and have a few options:
   \begin{itemize}
-    \item associated vs. unassociated
+    \item associated vs. standalone
     \item open vs. closed\textsuperscript{1}
     \item injectivity\textsuperscript{2}
   \end{itemize}
