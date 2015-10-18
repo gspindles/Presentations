@@ -44,9 +44,9 @@
   \begin{frame}
     \frametitle{Section Outline}
     \tableofcontents[
-      currentsection,
-      sectionstyle=show/hide,
-      subsectionstyle=show/show/hide
+    currentsection,
+    sectionstyle=show/hide,
+    subsectionstyle=show/show/hide
     ]
   \end{frame}
 }
@@ -164,9 +164,9 @@
 % Want to hide subsection slide by slide
 \begin{frame}{Agenda}
   \tableofcontents[
-%   pausesections,
-    sectionstyle=show,
-    subsectionstyle=hide
+  %   pausesections,
+  sectionstyle=show,
+  subsectionstyle=hide
   ]
 \end{frame}
 %\mytableofcontents
@@ -198,13 +198,13 @@
     \item \texttt{Coq}
   \end{itemize}
 
-    \ \\
-    \pause
-    But we will be using \texttt{Haskell} though.
+  \ \\
+  \pause
+  But we will be using \texttt{Haskell} though.
 
-    \ \\
-    \ \\
-    \textit{\tiny{Honestly, it's because they're way over his head...}}\\
+  \ \\
+  \ \\
+  \textit{\tiny{Honestly, it's because they're way over his head...}}\\
 \end{frame}
 
 \begin{frame}[fragile]{Dependent Types}
@@ -221,8 +221,8 @@
   \begin{lstlisting}[style=hask]
     infixr @vc5@ @vc:>@
     data Vect (n :: @dkNat@) a where
-      VNil :: Vect @vc0@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
+    VNil :: Vect @vc0@ a
+    (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
 
     vs :: Vect @vc6@ Int
     vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
@@ -332,9 +332,9 @@
     data Bool = False | True
 
     data @tcWeekdays@ = @vcSunday@ | @vcMonday@ | @vcTuesday@ | @vcWednesday@
-                  | @vcThursday@ | @vcFriday@ | @vcSaturday@
+    | @vcThursday@ | @vcFriday@ | @vcSaturday@
   \end{lstlisting}
-% \textit{\tiny{Does this remind you of anything?}}
+  % \textit{\tiny{Does this remind you of anything?}}
 
   A loose translation:
   \begin{lstlisting}[style=hask]
@@ -357,8 +357,8 @@
   For example:
   \begin{lstlisting}[style=hask]
     data @tcShape@ = @vcTriangle@ @tcSide@ @tcSide@ @tcSide@
-               | @vcRectangle@ @tcSide@ @tcSide@
-               | @vcCircle@ @tcRadius@
+    | @vcRectangle@ @tcSide@ @tcSide@
+    | @vcCircle@ @tcRadius@
   \end{lstlisting}
 
   A loose translation:
@@ -375,8 +375,8 @@
   Recall \htycon{Side} $\sim$ \htycon{Radius} $\sim$ \htycon{Double}:
   \begin{lstlisting}[style=hask]
     data @tcShape@ = @vcTriangle@ @tcSide@ @tcSide@ @tcSide@
-               | @vcRectangle@ @tcSide@ @tcSide@
-               | @vcCircle@ @tcRadius@
+    | @vcRectangle@ @tcSide@ @tcSide@
+    | @vcCircle@ @tcRadius@
   \end{lstlisting}
 
   \htycon{Types} of the 3 \hvalcon{Value} constructors:
@@ -417,7 +417,7 @@
 \begin{frame}[fragile]{Tuple}
   Actual built-in sugar:
   \begin{lstlisting}[style=hask]
-       data @tcTuple@ a b = @vcTuple@ a b
+    data @tcTuple@ a b = @vcTuple@ a b
     => data (@tc,@) a b = (@vc,@) a b
     => data (a@tc,@ b) = (a@vc,@ b)
   \end{lstlisting}
@@ -531,7 +531,7 @@
 \begin{frame}[fragile]{Types with Recursion}
   Actual built-in sugar is something like:
   \begin{lstlisting}[style=hask]
-       data List a = Nil | Cons a (List a)
+    data List a = Nil | Cons a (List a)
     => data @tc[]@ a = @vc[]@ | (@vc:@) a (@tc[]@ a)
     => data @tc[@a@tc]@ = @vc[]@ | (@vc:@) a @tc[@a@tc]@
   \end{lstlisting}
@@ -561,21 +561,21 @@
     even :: Int -> Bool
     even @vc0@ = True
     even n = if rem n @vc2@ == @vc0@
-             then True
-             else False
+    then True
+    else False
   \end{lstlisting}
 
   Not as loose translation:
   \begin{lstlisting}[style=hask]
     Bool even(Int n) {
       switch n:
-        case n == @vc0@:
-          return True;
-        default:
-          if rem(n, @vc2@) == @vc0@:
-            return True;
-          else
-            return False;
+      case n == @vc0@:
+      return True;
+      default:
+      if rem(n, @vc2@) == @vc0@:
+      return True;
+      else
+      return False;
     }
   \end{lstlisting}
 \end{frame}
@@ -594,10 +594,10 @@
   \begin{lstlisting}[style=hask]
     Int toInt(@tcNat@ n) {
       switch n:
-        case @vcZ@:
-          return @vc0@;
-        case (@vcS@ m):  -- n @|$\sim$@ (S m)
-          return @vc1@ + toInt(m);
+      case @vcZ@:
+      return @vc0@;
+      case (@vcS@ m):  -- n @|$\sim$@ (S m)
+      return @vc1@ + toInt(m);
     }
   \end{lstlisting}
 \end{frame}
@@ -616,7 +616,7 @@
   \begin{lstlisting}[style=hask]
     three = @vcS@ (@vcS@ (@vcS@ @vcZ@)) :: @tcNat@
 
-      toInt three :: Int
+    toInt three :: Int
     = toInt (@vcS@ (@vcS@ (@vcS@ @vcZ@)))
     = @vc1@ + toInt (@vcS@ (@vcS@ @vcZ@))
     = @vc1@ + @vc1@ + toInt (@vcS@ @vcZ@)
@@ -642,10 +642,10 @@
   \begin{lstlisting}[style=hask]
     Int length(List<A> ls) {
       switch ls:
-        case Nil:
-          return @vc0@;
-        case Cons(x, xs):
-          return @vc1@ + length(xs);
+      case Nil:
+      return @vc0@;
+      case Cons(x, xs):
+      return @vc1@ + length(xs);
     }
   \end{lstlisting}
 \end{frame}
@@ -664,7 +664,7 @@
   \begin{lstlisting}[style=hask]
     xs = @vc[@@vc4@, @vc8@@vc@, @vc15@@vc]@ = @vc4@ @vc:@ @vc8@ @vc:@ @vc15@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
 
-      length xs :: Int
+    length xs :: Int
     = length @vc[@@vc4@, @vc8@, @vc15@@vc]@
     = @vc1@ + length @vc[@@vc8@, @vc15@@vc]@
     = @vc1@ + @vc1@ + length @vc[@@vc15@@vc]@
@@ -741,7 +741,7 @@
   \ \\
   The is an extension on \texttt{$\lambda$-calculus} with \texttt{subtype polymorphism} and is denoted by $\lambda_{<:}$.\\
   => \texttt{Object Oriented Programming}
-  
+
   \ \\
   \scriptsize{Though this is not an axis that we are interested in}.
 \end{frame}
@@ -769,8 +769,8 @@
     even :: Int -> Bool
     even @vc0@ = True
     even n = if rem n @vc2@ == @vc0@
-             then True
-             else False
+    then True
+    else False
   \end{lstlisting}
 
   \qquad \texttt{even} maps \hvalcon{Int}s to \hvalcon{True} and \hvalcon{False}.
@@ -798,8 +798,8 @@
   \ \\
   => \texttt{Parametric polymorphism} of $\lambda2$
 
-%  \ \\
-%  \textit{\tiny{Are we seeing a pattern yet?}}
+  %  \ \\
+  %  \textit{\tiny{Are we seeing a pattern yet?}}
 \end{frame}
 
 \begin{frame}[fragile]{Value and Type Interdependency}
@@ -807,10 +807,10 @@
   \begin{itemize}
     \item \hvalcon{Values} depending on \hvalcon{Values}: \texttt{$\lambda$-calculus}
     \item \hvalcon{Values} depending on \htycon{Types}: $\lambda2$, \texttt{System F}
-    \pause
+      \pause
     \item \htycon{Types} depending on \htycon{Types}: $\lambda\underline\omega$\\
       => \texttt{Type-level programming} via \texttt{type operators}
-    \pause
+      \pause
     \item \htycon{Types} depending on \hvalcon{Values}: $\lambda\Pi$\\
       => \texttt{Dependent types}
   \end{itemize}
@@ -899,7 +899,7 @@
   \end{lstlisting}
 
   All these \hkind{Kinds} are built-in and inferred as of GHC 7.10.2.
-  
+
   \ \\
   \textit{\tiny{All of this will be changed with the next GHC 8.0.1 release.}}
 \end{frame}
@@ -935,16 +935,16 @@
   \begin{lstlisting}[style=hask]
     {-# LANGUAGE GADTs #-}
     data Bool where
-      False :: Bool
-      True  :: Bool
+    False :: Bool
+    True  :: Bool
 
     data Maybe a where
-      Nothing :: Maybe a
-      Just    :: a -> Maybe a
+    Nothing :: Maybe a
+    Just    :: a -> Maybe a
 
     data List a where
-      Nil  :: List a
-      Cons :: a -> List a -> List a
+    Nil  :: List a
+    Cons :: a -> List a -> List a
   \end{lstlisting}
 \end{frame}
 
@@ -981,16 +981,16 @@
     {-# LANGUAGE GADTs #-}
     {-# LANGUAGE KindSignatures #-}
     data Bool :: @dk*@ where
-      False :: Bool
-      True  :: Bool
+    False :: Bool
+    True  :: Bool
 
     data Maybe :: @dk*@ -> @dk*@ where
-      Nothing :: Maybe a
-      Just    :: a -> Maybe a
+    Nothing :: Maybe a
+    Just    :: a -> Maybe a
 
     data List :: @dk*@ -> @dk*@ where
-      Nil  :: List a
-      Cons :: a -> List a -> List a
+    Nil  :: List a
+    Cons :: a -> List a -> List a
   \end{lstlisting}
 \end{frame}
 
@@ -1066,7 +1066,7 @@
     add @vcZ@     m = m
     add (@vcS@ n) m = @vcS@ (add n m)
 
-      add (@vcS@ (@vcS@ @vcZ@)) (@vcS@ @vcZ@)
+    add (@vcS@ (@vcS@ @vcZ@)) (@vcS@ @vcZ@)
     = @vcS@ (add (@vcS@ @vcZ@) (@vcS@ @vcZ@))
     = @vcS@ (@vcS@ (add @vcZ@ (@vcS@ @vcZ@)))
     = @vcS@ (@vcS@ (@vcS@ @vcZ@))
@@ -1082,10 +1082,10 @@
     data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
 
     type family @tfAdd@ (n :: @dkNat@) (m :: @dkNat@) :: @dkNat@ where
-      @tfAdd@ @tc'@@vcZ@     m = m
-      @tfAdd@ (@tc'@@vcS@ n) m = @tc'@@vcS@ (@tfAdd@ n m)
+    @tfAdd@ @tc'@@vcZ@     m = m
+    @tfAdd@ (@tc'@@vcS@ n) m = @tc'@@vcS@ (@tfAdd@ n m)
 
-      @tfAdd@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) (@tc'@@vcS@ @tc'@@vcZ@)
+    @tfAdd@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) (@tc'@@vcS@ @tc'@@vcZ@)
     = @tc'@@vcS@ (@tfAdd@ (@tc'@@vcS@ @tc'@@vcZ@) (@tc'@@vcS@ @tc'@@vcZ@))
     = @tc'@@vcS@ (@tc'@@vcS@ (@tfAdd@ @tc'@@vcZ@ (@tc'@@vcS@ @tc'@@vcZ@)))
     = @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
@@ -1103,10 +1103,10 @@
     data @tcNat@ = @vcZ@ | @vcS@ @tcNat@
 
     type family (@tf:+@) n m where
-      @tc'@@vcZ@     @tf:+@ m = m
-      (@tc'@@vcS@ n) @tf:+@ m = @tc'@@vcS@ (n @tf:+@ m)
+    @tc'@@vcZ@     @tf:+@ m = m
+    (@tc'@@vcS@ n) @tf:+@ m = @tc'@@vcS@ (n @tf:+@ m)
 
-      (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)
+    (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@)) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)
     = @tc'@@vcS@ ((@tc'@@vcS@ @tc'@@vcZ@) @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@))
     = @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcZ@ @tf:+@ (@tc'@@vcS@ @tc'@@vcZ@)))
     = @tc'@@vcS@ (@tc'@@vcS@ (@tc'@@vcS@ @tc'@@vcZ@))
@@ -1124,8 +1124,8 @@
   \htycon{List}:
   \begin{lstlisting}[style=hask]
     data List a where
-      Nil  :: List a
-      Cons :: a -> List a -> List a
+    Nil  :: List a
+    Cons :: a -> List a -> List a
   \end{lstlisting}
 
   \htycon{Vector}:
@@ -1133,8 +1133,8 @@
     -- 'Z @|$\sim$@ 0
     -- 'S n @|$\sim$@ n :+ 1
     data Vect (n :: @dkNat@) a where
-      VNil :: Vect @vcZ@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (@vcS@ n) a
+    VNil :: Vect @vcZ@ a
+    (@vc:>@) :: a -> Vect n a -> Vect (@vcS@ n) a
 
     type @tcSix@ = @vcS@ (@vcS@ (@vcS@ (@vcS@ (@vcS@ (@vcS@ @vcZ@)))))
     vs :: Vect @tcSix@ Int
@@ -1148,8 +1148,8 @@
   \htycon{List}:
   \begin{lstlisting}[style=hask]
     data List a where
-      Nil  :: List a
-      Cons :: a -> List a -> List a
+    Nil  :: List a
+    Cons :: a -> List a -> List a
   \end{lstlisting}
 
   Module GHC.TypeLits provide \texttt{type-level literals}:
@@ -1157,8 +1157,8 @@
     -- 'Z @|$\sim$@ 0
     -- 'S n @|$\sim$@ n :+ 1
     data Vect (n :: @dkNat@) a where
-      VNil :: Vect @vc0@ a
-      (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
+    VNil :: Vect @vc0@ a
+    (@vc:>@) :: a -> Vect n a -> Vect (n @tf:+@ @vc1@) a
 
     vs :: Vect @vc6@ Int
     vs = @vc4@ @vc:>@ @vc8@ @vc:>@ @vc15@ @vc:>@ @vc16@ @vc:>@ @vc23@ @vc:>@ @vc42@ @vc:>@ VNil
@@ -1206,7 +1206,7 @@
     xs = @vc[@@vc4@, @vc8@@vc]@ = @vc4@ @vc:@ @vc8@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
     ys = @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@ = @vc15@ @vc:@ @vc16@ @vc:@ @vc23@ @vc:@ @vc42@ @vc:@ @vc[]@ :: @tc[@Int@tc]@
 
-      append xs ys :: @tc[@Int@tc]@
+    append xs ys :: @tc[@Int@tc]@
     = append @vc[@@vc4@, @vc8@@vc]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
     = @vc4@ @vc:@ append @vc[@@vc8@@vc]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
     = @vc4@ @vc:@ @vc8@ @vc:@ append @vc[]@ @vc[@@vc15@, @vc16@, @vc23@, @vc42@@vc]@
@@ -1245,7 +1245,7 @@
     xs = @vc[@@vc4@, @vc8@, @vc15@, @vc16@, @vc23@, @vc42@@vc]@ :: @tc[@Int@tc]@
     even :: Int -> Bool
 
-      map even xs :: @tc[@Bool@tc]@
+    map even xs :: @tc[@Bool@tc]@
     = map even @vc[@@vc4@, @vc8@, @vc15@, @vc16@@vc]@
     = even @vc4@ @vc:@ map even @vc[@@vc8@, @vc15@, @vc16@@vc]@
     = True @vc:@ even @vc8@ @vc:@ map even @vc[@@vc15@, @vc16@@vc]@
@@ -1286,7 +1286,7 @@
     xs = @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ :: @tc[@Char@tc]@
     ys = @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@ :: @tc[@Int@tc]@
 
-      zip xs ys :: @tc[@@tc(@Char@tc,@ Int@tc)@@tc]@
+    zip xs ys :: @tc[@@tc(@Char@tc,@ Int@tc)@@tc]@
     = zip @vc[@@str'a'@, @str'b'@, @str'c'@@vc]@ @vc[@@vc1@, @vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ zip @vc[@@str'b'@, @str'c'@@vc]@ @vc[@@vc2@, @vc3@, @vc4@@vc]@
     = (@str'a'@@vc,@ @vc1@) @vc:@ (@str'b'@@vc,@ @vc2@) @vc:@ zip @vc[@@str'c'@@vc]@ @vc[@@vc3@, @vc4@@vc]@
@@ -1316,9 +1316,9 @@
   \texttt{zip2} with \htyfam{Min} type family:
   \begin{lstlisting}[style=hask]
     type family Min n m where
-      Min @vcZ@     m     = @vcZ@
-      Min n     @vcZ@     = @vcZ@
-      Min (@vcS@ n) (@vcS@ m) = @vcS@ (Min n m)
+    Min @vcZ@     m     = @vcZ@
+    Min n     @vcZ@     = @vcZ@
+    Min (@vcS@ n) (@vcS@ m) = @vcS@ (Min n m)
 
     vzip2 :: Vect n a -> Vect m b -> Vect (Min n m) (a@tc,@ b)
     vzip2 (x@vc:>@xs) (y@vc:>@ys) = (x@vc,@y) @vc:>@ vzip2 xs ys
@@ -1394,7 +1394,7 @@
   \begin{lstlisting}[style=hask]
     -- Sugar ** for Sigma type constructor and Exists value constructor
     data @tcSigma@ :: @dkKProxy@ a -> (a -> @dk*@) -> @dk*@ where
-      (@vcExists@ :: @tfSing@ (x :: a) -> b x
+      @vcExists@ :: @tfSing@ (x :: a) -> b x
            -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
   \end{lstlisting}
 \end{frame}

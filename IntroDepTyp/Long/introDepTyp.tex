@@ -1673,7 +1673,7 @@
   \begin{lstlisting}[style=hask]
     -- Sugar ** for Sigma type constructor and Exists value constructor
     data @tcSigma@ :: @dkKProxy@ a -> (a -> @dk*@) -> @dk*@ where
-      (@vcExists@ :: @tfSing@ (x :: a) -> b x
+      @vcExists@ :: @tfSing@ (x :: a) -> b x
            -> @tcSigma@ (@tc'@@vcKProxy@ :: @dkKProxy@ a) b
   \end{lstlisting}
 \end{frame}
